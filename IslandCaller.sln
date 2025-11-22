@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.13.35806.99
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11217.181 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IslandCaller.PluginForClassIsland", "IslandCaller.PluginForClassIsland\IslandCaller.PluginForClassIsland.csproj", "{1D7CF684-735A-C39B-392A-BF3C2909F53A}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IslandCaller.PluginForClass
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Core\Core.vcxproj", "{2F981955-DAC5-4634-9317-2CB292EFF356}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IslandCaller.App", "IslandCaller.App\IslandCaller.App.csproj", "{2F8585FB-838E-4E69-83A7-3F00EBC90BE9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,6 +46,18 @@ Global
 		{2F981955-DAC5-4634-9317-2CB292EFF356}.Release|x64.Build.0 = Release|x64
 		{2F981955-DAC5-4634-9317-2CB292EFF356}.Release|x86.ActiveCfg = Release|Win32
 		{2F981955-DAC5-4634-9317-2CB292EFF356}.Release|x86.Build.0 = Release|Win32
+		{2F8585FB-838E-4E69-83A7-3F00EBC90BE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F8585FB-838E-4E69-83A7-3F00EBC90BE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F8585FB-838E-4E69-83A7-3F00EBC90BE9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2F8585FB-838E-4E69-83A7-3F00EBC90BE9}.Debug|x64.Build.0 = Debug|Any CPU
+		{2F8585FB-838E-4E69-83A7-3F00EBC90BE9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2F8585FB-838E-4E69-83A7-3F00EBC90BE9}.Debug|x86.Build.0 = Debug|Any CPU
+		{2F8585FB-838E-4E69-83A7-3F00EBC90BE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F8585FB-838E-4E69-83A7-3F00EBC90BE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F8585FB-838E-4E69-83A7-3F00EBC90BE9}.Release|x64.ActiveCfg = Release|Any CPU
+		{2F8585FB-838E-4E69-83A7-3F00EBC90BE9}.Release|x64.Build.0 = Release|Any CPU
+		{2F8585FB-838E-4E69-83A7-3F00EBC90BE9}.Release|x86.ActiveCfg = Release|Any CPU
+		{2F8585FB-838E-4E69-83A7-3F00EBC90BE9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
