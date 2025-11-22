@@ -6,13 +6,13 @@
              xmlns:local="clr-namespace:IslandCaller.App.Controls.FluentShower"
              mc:Ignorable="d" 
              d:DesignHeight="90">
-    <Grid VerticalAlignment="Center">
-        <Image Source="/IslandCaller.PluginForClassIsland;component/Resource/Shower.png" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+    <Grid>
         <TextBlock x:Name="textblock"
                    HorizontalAlignment="Left" 
                    VerticalAlignment="Center" 
                    FontSize="70" 
                    FontWeight="Black" 
                    Foreground="#FFE1D9FF" Height="100" Margin="270,0,0,0" FontFamily="HarmonyOS Sans SC"/>
+        <Image Source="/IslandCaller.App;component/Resource/Shower.png" HorizontalAlignment="Left" VerticalAlignment="Center"/>
     </Grid>
 </UserControl>

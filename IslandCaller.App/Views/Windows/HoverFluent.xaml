@@ -7,7 +7,6 @@
         xmlns:local="clr-namespace:IslandCaller.App.Views.Windows"
         xmlns:models="clr-namespace:IslandCaller.App.Models"
         xmlns:controls="clr-namespace:IslandCaller.App.Controls.HoverFluent"
-        d:DataContext="{d:DesignInstance Type=models:Settings}"
         mc:Ignorable="d"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -15,33 +14,27 @@
         ResizeMode="NoResize"
         Background="#01FFFFFF"
         Topmost="True"
-        ui:WindowHelper.UseModernWindowStyle="True"
-        ui:WindowHelper.SystemBackdropType="Acrylic"
         Title="Hover" Height="70" Width="163"
-        SourceInitialized="Window_SourceInitialized" 
+        SourceInitialized="Window_SourceInitialized"
         MouseLeftButtonDown="Window_MouseLeftButtonDown"
         AllowDrop="True">
     <Grid>
         <Button
             x:Name="MainButton"
-            Style="{DynamicResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"
+         
             Margin="10,0,0,0"
             Height="50"
             Width="85"
             Background="#BF8A73D6"
             Foreground="White"
             Click="MainButton_Click" 
-            MouseOverBackground="#E5715DC4" 
-            PressedBackground="#FF4E3BAB" 
             Focusable="False" 
-            PressedForeground="White"
             Padding="4"
             PreviewMouseLeftButtonDown="MainButton_PreviewMouseLeftButtonDown">
-            <controls:HoverMainButton x:Name="img" HorizontalAlignment="Center" VerticalAlignment="Center" Height="40"/>
+            <Image x:Name="img" Source="/IslandCaller.App;component/Resource/Main.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Button>
-        <ui:Button
+        <Button
             x:Name="Secondary_Button"
-            Appearance="Secondary"
             Margin="102,0,0,0"
             Height="50"
             Width="50" 
@@ -49,7 +42,8 @@
             Padding="4"
             Click="SecondaryButton_Click"
             PreviewMouseLeftButtonDown="SecondaryButton_PreviewMouseLeftButtonDown">
-            <controls:HoverSecondaryButton HorizontalAlignment="Center" VerticalAlignment="Center" Height="40"/>
-        </ui:Button>
+            <Image Source="/IslandCaller.App;component/Resource/Secondary.png" 
+           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Button>
     </Grid>
 </Window>

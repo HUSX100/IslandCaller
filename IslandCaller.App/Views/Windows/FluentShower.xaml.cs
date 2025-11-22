@@ -26,7 +26,7 @@ namespace IslandCaller.App.Views.Windows
         {
             var control = new Controls.FluentShower.FluentShowerControl(name)
             {
-                Height = 95,
+                Height =95,
                 Margin = new Thickness(20, 0, 25, 0),
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center

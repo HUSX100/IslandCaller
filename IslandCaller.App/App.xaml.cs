@@ -10,7 +10,14 @@ namespace IslandCaller.App
     /// </summary>
     public partial class App : Application
     {
-        Log.WriteLog("App.xaml.cs", "Debug", "IslandCaller Plugin Initializing");
+        public App()
+        {
+            Log.WriteLog("App.xaml.cs", "Debug", "IslandCaller Plugin Initializing");
+            new Settings().Load();
+            Settings.Instance.Profile.ProfileList.TryGetValue(Settings.Instance.Profile.DefaultProfile, out string value);
+            Core.RandomImport(value);
+            Status.Instance.fluenthover.Show();
+        }
     }
 
 }
