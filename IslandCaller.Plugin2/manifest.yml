@@ -1,0 +1,17 @@
+# nonk8s
+# 插件清单文件使用 YAML 格式存储。
+# YAML 教程：https://www.runoob.com/w3cnote/yaml-intro.html
+# 插件清单格式：https://docs.classisland.tech/zh-cn/latest/dev/plugins/create-project/#%E6%8F%92%E4%BB%B6%E6%B8%85%E5%8D%95%E6%96%87%E4%BB%B6
+
+id: IslandCaller.Plugin2
+name: IslandCaller
+description: 一个基于Classisland2.0插件的轻量级点名器
+entranceAssembly: "IslandCaller.Plugin2.dll"
+url: https://github.com/HUSX100/IslandCaller
+author: HUSX100
+version: 2.0.0.0
+apiVersion: 2.0.2.0
+icon: Icon2.ico
+repoOwner: HUSX100
+repoName: IslandCaller
+assetsRoot: master/IslandCaller.Plugin2/
