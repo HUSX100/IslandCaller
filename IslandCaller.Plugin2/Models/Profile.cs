@@ -7,18 +7,18 @@ using System.Text;
 
 namespace IslandCaller.Models
 {
-    internal class Profile
+    public class Profile
     {
-        internal class Person
+        public class Person
         {
-            public string Id { get; set; }
+            public int Id { get; set; }
             public string Name { get; set; }
-            public string Gender { get; set; }
+            public int Gender { get; set; }
         }
         // 名单存储
         public List<Person> Members { get; set; } = new List<Person>();
 
-        private static string GetBasePath()
+        private string GetBasePath()
         {
             return Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -27,7 +27,7 @@ namespace IslandCaller.Models
             );
         }
 
-        private static string GetFilePath(Guid guid)
+        private string GetFilePath(Guid guid)
         {
             return Path.Combine(GetBasePath(), $"{guid}.csv");
         }
@@ -82,17 +82,15 @@ namespace IslandCaller.Models
 
                 Members.Add(new Person
                 {
-                    Id = parts[0],
+                    Id = Convert.ToInt32(parts[0]),
                     Name = parts[1],
-                    Gender = parts[2]
+                    Gender = Convert.ToInt32(parts[2])
                 });
             }
         }
 
-        /// <summary>
-        /// 获取名单
-        /// </summary>
-        public static async Task<List<Person>> GetMembers(Guid guid)
+        // 获取名单
+        public async Task<List<Person>> GetMembers(Guid guid)
         {
             var logger = IAppHost.GetService<ILogger<Profile>>();
             string filePath = GetFilePath(guid);
@@ -135,19 +133,17 @@ namespace IslandCaller.Models
 
                 members.Add(new Person
                 {
-                    Id = parts[0],
+                    Id = Convert.ToInt32(parts[0]),
                     Name = parts[1],
-                    Gender = parts[2]
+                    Gender = Convert.ToInt32(parts[2])
                 });
             }
 
             return members;
         }
 
-        /// <summary>
-        /// 写入名单（覆盖或创建）
-        /// </summary>
-        public static async Task SaveMembersAsync(Guid guid, List<Person> members)
+        // 写入名单（覆盖或创建）
+        public async Task SaveMembersAsync(Guid guid, List<Person> members)
         {
             var logger = IAppHost.GetService<ILogger<Profile>>();
             string basePath = GetBasePath();
@@ -180,6 +176,29 @@ namespace IslandCaller.Models
                 logger.LogError(ex, $"写入名单文件失败: {filePath}");
                 throw new Exception($"写入名单文件失败: {filePath}", ex);
             }
+        }
+
+        public void CreateDemoProfile(Guid guid)
+        { 
+            List<Person> members = new List<Person>();
+            members.Add(new Person
+            {
+                Id = 1,
+                Gender = 0,
+                Name = "小明"
+            });
+            members.Add(new Person
+            {
+                Id = 1,
+                Gender = 0,
+                Name = "李明"
+            });
+            members.Add(new Person
+            {
+                Id = 1,
+                Gender = 1,
+                Name = "李华"
+            });
         }
     }
 }
