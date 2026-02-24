@@ -1,4 +1,5 @@
 ﻿using IslandCaller.App.Models;
+using IslandCaller.App.Views.Windows;
 using System.Configuration;
 using System.Data;
 using System.Windows;
@@ -17,6 +18,7 @@ namespace IslandCaller.App
             Settings.Instance.Profile.ProfileList.TryGetValue(Settings.Instance.Profile.DefaultProfile, out string value);
             Core.RandomImport(value);
             Status.Instance.fluenthover.Show();
+            new SettingWindow().Show();
         }
     }
 

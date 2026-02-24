@@ -27,11 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ViewModel\" />
-    <Folder Include="Converter\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="Controls\FluentShower\FluentShowerControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
