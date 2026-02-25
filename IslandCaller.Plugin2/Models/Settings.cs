@@ -2,12 +2,14 @@
 using ReactiveUI;
 using System.Text.Json;
 using ClassIsland.Core.Controls;
+using IslandCaller.Plugin2.Services;
 
 namespace IslandCaller.Models
 {
-    public class Settings
+    public class Settings(ProfileService profileService)
     {
         public static SettingsModel Instance { get; } = new SettingsModel();
+        public ProfileService ProfileService { get; } = profileService;
 
         public void Load()
         {
@@ -35,7 +37,7 @@ namespace IslandCaller.Models
                 IsC_HoverKey_Position?.SetValue("X", Instance.Hover.Position.X);
                 IsC_HoverKey_Position?.SetValue("Y", Instance.Hover.Position.Y);
 
-                Status.profile.CreateDemoProfile(Instance.Profile.DefaultProfile);
+                ProfileService.CreateDemoProfile(Instance.Profile.DefaultProfile);
                 ClassIsland.Core.Controls.CommonTaskDialogs.ShowDialog("Welcome", "欢迎使用IslandCaller2.0");
             }
             else

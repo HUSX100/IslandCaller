@@ -5,15 +5,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace IslandCaller.Models
+namespace IslandCaller.Plugin2.Services
 {
-    public class Profile
+    public class ProfileService
     {
         public class Person
         {
             public int Id { get; set; }
             public string Name { get; set; }
             public int Gender { get; set; }
+            public double ManualWeight { get; set; } = 1.0; // 手动权重，默认为 1.0
         }
         // 名单存储
         public List<Person> Members { get; set; } = new List<Person>();
@@ -33,9 +34,9 @@ namespace IslandCaller.Models
         }
 
         // 读取名单
-        public async Task Load(Guid guid)
+        public void LoadSelectedProfile(Guid guid)
         {
-            var logger = IAppHost.GetService<ILogger<Profile>>();
+            var logger = IAppHost.GetService<ILogger<ProfileService>>();
             // 构建路径
 
             string filePath = Path.Combine(GetFilePath(guid));
@@ -47,7 +48,7 @@ namespace IslandCaller.Models
                 throw new FileNotFoundException($"找不到对应的名单文件: {filePath}");
             }
 
-            string[] lines = await File.ReadAllLinesAsync(filePath);
+            string[] lines = File.ReadAllLines(filePath);
 
             if (lines.Length == 0)
             {
@@ -84,15 +85,16 @@ namespace IslandCaller.Models
                 {
                     Id = Convert.ToInt32(parts[0]),
                     Name = parts[1],
-                    Gender = Convert.ToInt32(parts[2])
+                    Gender = Convert.ToInt32(parts[2]),
+                    ManualWeight = Convert.ToDouble(parts.Length > 3 ? parts[3] : "1.0") // 如果有第四列则读取，否则默认为 1.0
                 });
             }
         }
 
         // 获取名单
-        public async Task<List<Person>> GetMembers(Guid guid)
+        public List<Person> GetMembers(Guid guid)
         {
-            var logger = IAppHost.GetService<ILogger<Profile>>();
+            var logger = IAppHost.GetService<ILogger<ProfileService>>();
             string filePath = GetFilePath(guid);
 
             if (!File.Exists(filePath))
@@ -101,7 +103,7 @@ namespace IslandCaller.Models
                 throw new FileNotFoundException($"找不到对应的名单文件: {filePath}");
             }
 
-            string[] lines = await File.ReadAllLinesAsync(filePath);
+            string[] lines = File.ReadAllLines(filePath);
 
             if (lines.Length == 0)
             {
@@ -143,9 +145,9 @@ namespace IslandCaller.Models
         }
 
         // 写入名单（覆盖或创建）
-        public async Task SaveMembersAsync(Guid guid, List<Person> members)
+        public void SaveProfile(Guid guid, List<Person> members)
         {
-            var logger = IAppHost.GetService<ILogger<Profile>>();
+            var logger = IAppHost.GetService<ILogger<ProfileService>>();
             string basePath = GetBasePath();
 
             // 如果目录不存在就创建
@@ -169,7 +171,7 @@ namespace IslandCaller.Models
             // 覆盖写入
             try
             {
-                await File.WriteAllTextAsync(filePath, sb.ToString(), Encoding.UTF8);
+                File.WriteAllText(filePath, sb.ToString(), Encoding.UTF8);
             }
             catch (Exception ex)
             {
@@ -199,6 +201,7 @@ namespace IslandCaller.Models
                 Gender = 1,
                 Name = "李华"
             });
+            SaveProfile(guid, members);
         }
     }
 }

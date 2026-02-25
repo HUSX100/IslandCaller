@@ -3,52 +3,44 @@ using ClassIsland.Core.Abstractions.Services;
 using ClassIsland.Shared.Enums;
 using IslandCaller.Models;
 using Microsoft.Extensions.Hosting;
-using Status = IslandCaller.Models.Status;
+using IslandCaller.Plugin2.Services;
 
-namespace IslandCaller.Services.IslandCallerHostService
+namespace IslandCaller.Services.IslandCallerService
 {
-    public class IslandCallerHostService : IHostedService
+    public class IslandCallerService
     {
-        private ILessonsService LessonsService { get; }
-        public IUriNavigationService UriNavigationService { get; }
 
-        public IslandCallerHostService(Plugin plugin, IUriNavigationService uriNavigationService, ILessonsService lessonsService)
+        public IslandCallerService(Plugin plugin, 
+                                    IUriNavigationService uriNavigationService, 
+                                    ILessonsService lessonsService,
+                                    HistoryService historyService,
+                                    CoreService coreService)
         {
-            LessonsService = lessonsService;
-            UriNavigationService = uriNavigationService;
             lessonsService.CurrentTimeStateChanged += (s, e) =>
             {
-                Status.Instance.lessonstatu = lessonsService.CurrentState;
-                new History().ClearTop20();
+                historyService.ClearThisLessonHistory();
             };
-            UriNavigationService.HandlePluginsNavigation(
+            uriNavigationService.HandlePluginsNavigation(
                 "IslandCaller/Run",
                 args =>
                 {
-                    new IslandCallerNotificationProviderNew().RandomCall(1);
+                    new IslandCallerNotificationProviderNew(lessonsService,coreService).RandomCall(1);
                 }
             );
-            UriNavigationService.HandlePluginsNavigation(
+            uriNavigationService.HandlePluginsNavigation(
                 "IslandCaller/Simple",
                 args =>
                 {
-                    new IslandCallerNotificationProviderNew().RandomCall(1);
+                    new IslandCallerNotificationProviderNew(lessonsService,coreService).RandomCall(1);
                 }
             );
-            UriNavigationService.HandlePluginsNavigation(
+            uriNavigationService.HandlePluginsNavigation(
                 "IslandCaller/Advanced/GUI",
                 args =>
                 {
-                    new IslandCallerNotificationProviderNew().RandomCall(1);
+                    new IslandCallerNotificationProviderNew(lessonsService,coreService).RandomCall(1);
                 }
             );
-        }
-        public async Task StartAsync(CancellationToken cancellationToken)
-        {
-        }
-
-        public async Task StopAsync(CancellationToken cancellationToken)
-        {
         }
     }
 }
