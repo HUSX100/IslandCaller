@@ -1,118 +1,122 @@
-# 插件自述文件
+<div align="center">
 
-本文件会在插件市场上显示。在安装插件后，本自述文件也会在【应用设置】->【插件】页面中显示。因此，本文件也将会是用户了解你的插件功能的重要途径，建议好好写 README。
+# IslandCaller（ClassIsland 2.0 插件）
 
-**注意事项：**
+一个为课堂场景设计的轻量级点名插件。  
+目标是：**上手快、抽取公平、课堂操作顺手**。
 
-- 嵌入图片时请使用网络图床。
-- 支持在这里直接调用 ClassIsland 内部的 Uri，例如[classisland://app/test/](classisland://app/test/)。
-- 本文件一般会在 ClassIsland 内置的 Markdown 渲染器（基于 [MdXaml](https://github.com/whistyun/MdXaml)）中渲染，仅支持部分 Markdown 语法。
+</div>
 
-***
+---
 
-**支持的 Markdown 语法：**
+## 插件特色
 
-> 本示例魔改自 [Leanote 博客](http://leanote.leanote.com/post/markdown-source-code)。
+- **一键点名**：支持快速抽取 1 人。
+- **自定义抽取人数**：支持图形界面选择人数后再抽取。
+- **名单可视化编辑**：在设置页直接增删学生、修改性别、手动权重。
+- **多格式导入**：支持 `.txt`、SecRandom `.json`、`.csv`。
+- **公平性优化**：综合“手动权重 + 本节课记录 + 长期历史”动态计算抽取概率。
+- **悬浮窗快捷操作**：支持启用/禁用、缩放、位置记忆。
+- **下课保护**：可设置在非上课时间禁用点名功能。
 
-# Welcome to ClassIsland! 欢迎来到ClassIsland!
- 
-## 1. 排版
- 
-**粗体** *斜体* 
- 
-~~这是一段错误的文本。~~
- 
-引用:
- 
-> 123123123123
- 
-有充列表:
- 1. 支持Vim
- 2. 支持Emacs
- 
-无序列表:
- 
- - 项目1
- - 项目2
- 
- 
-## 2. 图片与链接
- 
-网络图片:
-![Banner](https://github.com/user-attachments/assets/a815dd7d-8343-4da5-aee4-3f754aa297e4)
+---
 
-WPF 资源图片：
+## 使用教程
 
-![1690356161339](pack://application:,,,/ClassIsland;component/Assets/AppLogo.png)
+### 1. 安装插件
 
-链接:
- 
-[ClassIsland 官网](http://classisland.tech)
- 
-## 3. 标题
- 
-以下是各级标题, 最多支持5级标题
- 
+1. 打开 ClassIsland 插件市场。
+2. 搜索并安装 **IslandCaller**。
+3. 安装后进入：`应用设置 -> 插件 -> IslandCaller 设置`。
+
+### 2. 准备名单
+
+你可以使用以下任一方式：
+
+- **手动录入**：在“档案编辑”里直接添加学生；
+- **导入名单**：点击“导入名单”，选择支持格式文件。
+
+支持格式：
+
+- 文本名单：`*.txt`（姓名用空格/逗号/换行分隔）
+- SecRandom 名单：`*.json`
+- CSV 名单：`*.csv`
+
+### 3. 开始点名
+
+- **快速点名（1 人）**：直接调用简单抽取入口；
+- **自定义点名（多人）**：打开高级界面设置人数后抽取；
+- **悬浮窗点名**：在设置中启用悬浮窗后可快速操作。
+
+### 4. 可选设置建议
+
+- 开启“下课禁用”：避免非上课时误触发；
+- 按屏幕调整“悬浮窗缩放系数”；
+- 按需设置学生“手动权重”，实现更灵活的抽取策略。
+
+---
+
+## URI 调用方式（可用于快捷方式/联动）
+
+- 简单抽取（1 人）
+
+```text
+classisland://plugins/IslandCaller/Simple
 ```
-# h1
-## h2
-### h3
-#### h4
-##### h4
-###### h5
+
+- 高级抽取（GUI 指定人数）
+
+```text
+classisland://plugins/IslandCaller/Advanced/GUI
 ```
- 
-## 4. 代码
- 
-示例:
- 
-    function get(key) {
-        return m[key];
-    }
-    
-代码高亮示例:
- 
-``` javascript
-/**
-* nth element in the fibonacci series.
-* @param n >= 0
-* @return the nth element, >= 0.
-*/
-function fib(n) {
-  var a = 1, b = 1;
-  var tmp;
-  while (--n >= 0) {
-    tmp = a;
-    a += b;
-    b = tmp;
-  }
-  return a;
-}
- 
-document.write(fib(10));
+
+---
+
+## 导入文件示例
+
+### 文本名单（`.txt`）
+
+```text
+张三 李四
+王五,赵六
+钱七
 ```
- 
-```python
-class Employee:
-   empCount = 0
- 
-   def __init__(self, name, salary):
-        self.name = name
-        self.salary = salary
-        Employee.empCount += 1
+
+### CSV 名单（`.csv`）
+
+> 建议不带标题行；如有性别列，请在导入时配置男/女映射值。
+
+```csv
+1,张三,男
+2,李四,女
+3,王五,男
 ```
- 
-# 5. Markdown 扩展
- 
-Markdown 扩展支持:
- 
-* 表格
- 
-## 5.1 表格
- 
-Item     | Value
--------- | ---
-Computer | \$1600
-Phone    | \$12
-Pipe     | \$1
- 
+
+---
+
+## 常见问题
+
+- **点击快捷方式无反应？**
+  - 请确认 ClassIsland 已启用 URI 协议注册。
+- **导入后性别不正确？**
+  - 请在导入对话框中检查男/女映射文本是否与源文件一致。
+- **悬浮窗位置异常？**
+  - 调整一次位置后会自动记忆，下次启动会按保存位置显示。
+
+---
+
+## 反馈与支持
+
+- 项目地址：<https://github.com/HUSX100/IslandCaller>
+- 问题反馈：<https://github.com/HUSX100/IslandCaller/issues>
+---
+
+## 致谢
+
+本项目使用了以下第三方库：
+
+- ClassIsland.PluginSdk
+
+## 许可
+
+本项目使用 GPL3 许可证进行开源，详细信息请查看 LICENSE 文件。
