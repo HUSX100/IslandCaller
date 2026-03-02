@@ -76,6 +76,9 @@ classisland://plugins/IslandCaller/Advanced/GUI
 
 ### 文本名单（`.txt`）
 
+>[!tip]
+>相邻姓名之间使用逗号，空格，或换行分隔
+
 ```text
 张三 李四
 王五,赵六
@@ -84,7 +87,8 @@ classisland://plugins/IslandCaller/Advanced/GUI
 
 ### CSV 名单（`.csv`）
 
-> 建议不带标题行；如有性别列，请在导入时配置男/女映射值。
+>[!important]
+> 要求不带标题行；如有性别列，请在导入时配置男/女映射值。
 
 ```csv
 1,张三,男
