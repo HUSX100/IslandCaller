@@ -1,8 +1,6 @@
 ﻿using Microsoft.Win32;
-using ReactiveUI;
 using System.Text.Json;
-using ClassIsland.Core.Controls;
-using IslandCaller.Plugin2.Services;
+using IslandCaller.Services;
 
 namespace IslandCaller.Models
 {
@@ -34,6 +32,7 @@ namespace IslandCaller.Models
                 IsC_ProfileKey?.SetValue("ProfileList", JsonSerializer.Serialize(Instance.Profile.ProfileList));
                 IsC_ProfileKey?.SetValue("PreferProfile", JsonSerializer.Serialize(Instance.Profile.ProfilePrefer));
                 IsC_HoverKey?.SetValue("IsEnable", Instance.Hover.IsEnable);
+                IsC_HoverKey?.SetValue("ScalingFactor", Instance.Hover.ScalingFactor);
                 IsC_HoverKey_Position?.SetValue("X", Instance.Hover.Position.X);
                 IsC_HoverKey_Position?.SetValue("Y", Instance.Hover.Position.Y);
 
@@ -47,15 +46,17 @@ namespace IslandCaller.Models
                 IsC_HoverKey = IsC_RootKey?.OpenSubKey("Hover", writable: true);
                 IsC_HoverKey_Position = IsC_HoverKey?.OpenSubKey("Position", writable: true);
 
-                Instance.General.BreakDisable = Convert.ToBoolean(IsC_GeneralKey?.GetValue("BreakDisable"));
+                Instance.General.BreakDisable = Convert.ToBoolean(IsC_GeneralKey?.GetValue("BreakDisable") ?? true);
                 Instance.Profile.ProfileNum = Convert.ToInt32(IsC_ProfileKey?.GetValue("ProfileNum"));
                 Instance.Profile.DefaultProfile = Guid.Parse(IsC_ProfileKey?.GetValue("DefaultProfileName") as string);
-                Instance.Profile.IsPreferProfile = Convert.ToBoolean(IsC_ProfileKey?.GetValue("IsPreferProfile"));
-                Instance.Profile.ProfileList = JsonSerializer.Deserialize<Dictionary<Guid, string>>(IsC_ProfileKey?.GetValue("ProfileList") as string);
-                Instance.Profile.ProfilePrefer = JsonSerializer.Deserialize<Dictionary<Guid, string>>(IsC_ProfileKey?.GetValue("PreferProfile") as string);
-                Instance.Hover.IsEnable = Convert.ToBoolean(IsC_HoverKey?.GetValue("IsEnable"));
-                Instance.Hover.Position.X = Convert.ToDouble(IsC_HoverKey_Position?.GetValue("X"));
-                Instance.Hover.Position.Y = Convert.ToDouble(IsC_HoverKey_Position?.GetValue("Y"));
+                Instance.Profile.IsPreferProfile = Convert.ToBoolean(IsC_ProfileKey?.GetValue("IsPreferProfile") ?? false);
+                Instance.Profile.ProfileList = JsonSerializer.Deserialize<Dictionary<Guid, string>>((IsC_ProfileKey?.GetValue("ProfileList") ?? "{}") as string);
+                Instance.Profile.ProfilePrefer = JsonSerializer.Deserialize<Dictionary<Guid, string>>((IsC_ProfileKey?.GetValue("PreferProfile") ?? "{}") as string);
+                Instance.Hover.IsEnable = Convert.ToBoolean(IsC_HoverKey?.GetValue("IsEnable") ?? true);
+                Instance.Hover.ScalingFactor = Convert.ToDouble(IsC_HoverKey?.GetValue("ScalingFactor") ?? 1.0);
+                Instance.Hover.Position.X = Convert.ToDouble(IsC_HoverKey_Position?.GetValue("X") ?? 200.0);
+                Instance.Hover.Position.Y = Convert.ToDouble(IsC_HoverKey_Position?.GetValue("Y") ?? 200.0);
+                Save();
             }
 
             SettingsBinder.Bind(Instance, Save);
@@ -76,6 +77,7 @@ namespace IslandCaller.Models
             IsC_ProfileKey?.SetValue("ProfileList", JsonSerializer.Serialize(Instance.Profile.ProfileList));
             IsC_ProfileKey?.SetValue("PreferProfile", JsonSerializer.Serialize(Instance.Profile.ProfilePrefer));
             IsC_HoverKey?.SetValue("IsEnable", Instance.Hover.IsEnable);
+            IsC_HoverKey?.SetValue("ScalingFactor", Instance.Hover.ScalingFactor);
             IsC_HoverKey_Position?.SetValue("X", Instance.Hover.Position.X);
             IsC_HoverKey_Position?.SetValue("Y", Instance.Hover.Position.Y);
         }

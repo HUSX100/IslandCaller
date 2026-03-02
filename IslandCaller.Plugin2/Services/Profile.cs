@@ -1,11 +1,8 @@
 ﻿using ClassIsland.Shared;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
 
-namespace IslandCaller.Plugin2.Services
+namespace IslandCaller.Services
 {
     public class ProfileService
     {
@@ -58,10 +55,10 @@ namespace IslandCaller.Plugin2.Services
 
             // 检查标题
             string header = lines[0].Trim();
-            if (header != "id,name,gender")
+            if (header != "id,name,gender,manualweight")
             {
-                logger.LogError("CSV 标题格式错误，必须为: id,name,gender");
-                throw new Exception("CSV 标题格式错误，必须为: id,name,gender");
+                logger.LogError("CSV 标题格式错误，必须为: id,name,gender,manualweight");
+                throw new Exception("CSV 标题格式错误，必须为: id,name,gender,manualweight");
             }
 
             Members.Clear();
@@ -75,7 +72,7 @@ namespace IslandCaller.Plugin2.Services
 
                 string[] parts = line.Split(',');
 
-                if (parts.Length != 3)
+                if (parts.Length != 4)
                 {
                     logger.LogWarning($"第 {i + 1} 行格式错误: {line}");
                     continue;
@@ -86,9 +83,10 @@ namespace IslandCaller.Plugin2.Services
                     Id = Convert.ToInt32(parts[0]),
                     Name = parts[1],
                     Gender = Convert.ToInt32(parts[2]),
-                    ManualWeight = Convert.ToDouble(parts.Length > 3 ? parts[3] : "1.0") // 如果有第四列则读取，否则默认为 1.0
+                    ManualWeight = Convert.ToDouble(parts[3])
                 });
             }
+            Members = Members.OrderBy(x => x.Id).ToList();
         }
 
         // 获取名单
@@ -111,10 +109,10 @@ namespace IslandCaller.Plugin2.Services
                 throw new Exception("CSV 文件为空");
             }
 
-            if (lines[0].Trim() != "id,name,gender")
+            if (lines[0].Trim() != "id,name,gender,manualweight")
             {
-                logger.LogError("CSV 标题格式错误，必须为: id,name,gender");
-                throw new Exception("CSV 标题格式错误，必须为: id,name,gender");
+                logger.LogError("CSV 标题格式错误，必须为: id,name,gender,manualweight");
+                throw new Exception("CSV 标题格式错误，必须为: id,name,gender,manualweight");
             }
 
             List<Person> members = new List<Person>();
@@ -127,7 +125,7 @@ namespace IslandCaller.Plugin2.Services
 
                 string[] parts = line.Split(',');
 
-                if (parts.Length != 3)
+                if (parts.Length != 4)
                 {
                     logger.LogWarning($"第 {i + 1} 行格式错误: {line}");
                     continue;
@@ -137,10 +135,11 @@ namespace IslandCaller.Plugin2.Services
                 {
                     Id = Convert.ToInt32(parts[0]),
                     Name = parts[1],
-                    Gender = Convert.ToInt32(parts[2])
+                    Gender = Convert.ToInt32(parts[2]),
+                    ManualWeight = Convert.ToDouble(parts[3])
                 });
             }
-
+            members = members.OrderBy(x => x.Id).ToList();
             return members;
         }
 
@@ -148,6 +147,7 @@ namespace IslandCaller.Plugin2.Services
         public void SaveProfile(Guid guid, List<Person> members)
         {
             var logger = IAppHost.GetService<ILogger<ProfileService>>();
+            members = members.OrderBy(x => x.Id).ToList();
             string basePath = GetBasePath();
 
             // 如果目录不存在就创建
@@ -161,11 +161,11 @@ namespace IslandCaller.Plugin2.Services
             StringBuilder sb = new StringBuilder();
 
             // 写标题
-            sb.AppendLine("id,name,gender");
+            sb.AppendLine("id,name,gender,manualweight");
 
             foreach (var person in members)
             {
-                sb.AppendLine($"{person.Id},{person.Name},{person.Gender}");
+                sb.AppendLine($"{person.Id},{person.Name},{person.Gender},{person.ManualWeight}");
             }
 
             // 覆盖写入
@@ -187,19 +187,22 @@ namespace IslandCaller.Plugin2.Services
             {
                 Id = 1,
                 Gender = 0,
-                Name = "小明"
+                Name = "小明",
+                ManualWeight = 1.0
             });
             members.Add(new Person
             {
-                Id = 1,
+                Id = 2,
                 Gender = 0,
-                Name = "李明"
+                Name = "李明",
+                ManualWeight = 1.0
             });
             members.Add(new Person
             {
-                Id = 1,
+                Id = 3,
                 Gender = 1,
-                Name = "李华"
+                Name = "李华",
+                ManualWeight = 1.0
             });
             SaveProfile(guid, members);
         }

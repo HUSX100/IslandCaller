@@ -1,0 +1,42 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ci="clr-namespace:ClassIsland.Core.Controls;assembly=ClassIsland.Core"
+        xmlns:controls="clr-namespace:IslandCaller.Controls"
+        xmlns:vm="using:IslandCaller.ViewModels"
+        xmlns:cvt="using:IslandCaller.Converters"
+        mc:Ignorable="d"
+        x:Class="IslandCaller.Views.HoverFluent"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        TransparencyLevelHint="AcrylicBlur"
+        Background = "Transparent"
+        SystemDecorations="Full"
+        Height="{Binding Height}"
+        Width="{Binding Width}"
+        ShowInTaskbar="False"
+        Topmost="True"
+        CanResize="False"
+        Focusable="False">
+    <!-- 设置窗口数据上下文 -->
+    <Window.DataContext>
+        <vm:HoverFluentViewModel />
+    </Window.DataContext>
+    <Design.DataContext>
+        <vm:HoverFluentViewModel />
+    </Design.DataContext>
+
+    <LayoutTransformControl
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center">
+        <LayoutTransformControl.LayoutTransform>
+            <ScaleTransform ScaleX="{Binding WindowScalingFactor}" ScaleY="{Binding WindowScalingFactor}"/>
+        </LayoutTransformControl.LayoutTransform>
+		<controls:HoverFluentControl 
+            x:Name="HoverControl"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"/>
+    </LayoutTransformControl>
+</Window>

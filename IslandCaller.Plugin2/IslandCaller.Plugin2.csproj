@@ -17,13 +17,22 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Update="Views\CsvImport.axaml.cs">
+        <DependentUpon>CsvImport.axaml</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Icon.ico">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Icon.png">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
         <None Update="manifest.yml">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="README.md">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="icon.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>

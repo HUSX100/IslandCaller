@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using static System.Guid;
+﻿using static System.Guid;
 using System.ComponentModel;
 
 namespace IslandCaller.Models
@@ -15,12 +14,12 @@ namespace IslandCaller.Models
     {
         public GeneralSetting()
         {
-            _version = "2.0.0.0";
-            _breakdisable = false;
+            _version = new Version(2, 0, 0, 0);
+            _breakdisable = true;
         }
 
-        private string _version;
-        public string Version
+        private Version _version;
+        public Version Version
         {
             get => _version;
         }
@@ -90,6 +89,7 @@ namespace IslandCaller.Models
         public HoverSetting()
         {
             _isEnable = true;
+            _scalingFactor = 1.0;
         }
 
         private bool _isEnable;
@@ -97,6 +97,14 @@ namespace IslandCaller.Models
         {
             get => _isEnable;
             set { if (_isEnable != value) { _isEnable = value; OnPropertyChanged(nameof(IsEnable)); } }
+        }
+
+        private double _scalingFactor;
+
+        public double ScalingFactor
+        {
+            get => _scalingFactor;
+            set { if (_scalingFactor != value) { _scalingFactor = value; OnPropertyChanged(nameof(ScalingFactor)); } }
         }
 
         public PositionSetting Position { get; set; } = new PositionSetting();

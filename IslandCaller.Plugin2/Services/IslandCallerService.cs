@@ -1,32 +1,29 @@
 ﻿using IslandCaller.Services.NotificationProvidersNew;
 using ClassIsland.Core.Abstractions.Services;
-using ClassIsland.Shared.Enums;
-using IslandCaller.Models;
-using Microsoft.Extensions.Hosting;
-using IslandCaller.Plugin2.Services;
+using IslandCaller.Views;
 
 namespace IslandCaller.Services.IslandCallerService
 {
     public class IslandCallerService
     {
-
+        private ILessonsService LessonsService { get; }
+        private CoreService CoreService {  get; }
+        private Plugin Plugin { get; }
         public IslandCallerService(Plugin plugin, 
                                     IUriNavigationService uriNavigationService, 
                                     ILessonsService lessonsService,
                                     HistoryService historyService,
-                                    CoreService coreService)
+                                    CoreService coreService
+            )
         {
+            
+            LessonsService = lessonsService;
+            CoreService = coreService;
+            Plugin = plugin;
             lessonsService.CurrentTimeStateChanged += (s, e) =>
             {
                 historyService.ClearThisLessonHistory();
             };
-            uriNavigationService.HandlePluginsNavigation(
-                "IslandCaller/Run",
-                args =>
-                {
-                    new IslandCallerNotificationProviderNew(lessonsService,coreService).RandomCall(1);
-                }
-            );
             uriNavigationService.HandlePluginsNavigation(
                 "IslandCaller/Simple",
                 args =>
@@ -38,9 +35,17 @@ namespace IslandCaller.Services.IslandCallerService
                 "IslandCaller/Advanced/GUI",
                 args =>
                 {
-                    new IslandCallerNotificationProviderNew(lessonsService,coreService).RandomCall(1);
+                    new PersonalCall().Show();
                 }
             );
+        }
+
+        public async void ShowRandomStudent(int stunum)
+        {
+            Plugin.PluginStatus = false;
+            new IslandCallerNotificationProviderNew(LessonsService, CoreService).RandomCall(stunum);
+            await Task.Delay(stunum * 2000 + 1000);
+            Plugin.PluginStatus = true;
         }
     }
 }

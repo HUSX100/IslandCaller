@@ -3,9 +3,8 @@ using ClassIsland.Core.Abstractions.Services.NotificationProviders;
 using ClassIsland.Core.Attributes;
 using ClassIsland.Core.Models.Notification;
 using ClassIsland.Shared.Enums;
-
 using IslandCaller.Models;
-using IslandCaller.Plugin2.Services;
+using System.Text;
 
 namespace IslandCaller.Services.NotificationProvidersNew;
 
@@ -21,7 +20,17 @@ public class IslandCallerNotificationProviderNew(ILessonsService lessonsService,
     public async void RandomCall(int stunum)
     {
         if (Settings.Instance.General.BreakDisable & lessonsService.CurrentState == TimeState.Breaking) return;
-        string output = coreService.GetRandomStudent();
+        var sb = new StringBuilder();
+        for (int i = 0; i < stunum; i++)
+        {
+            sb.Append(coreService.GetRandomStudent());
+
+            if (i != stunum-1)
+            {
+                sb.Append("  ");
+            }
+        }
+        string output = sb.ToString();
         int maskduration = stunum * 2 + 1; // 计算持续时间
         ShowNotification(new NotificationRequest()
         {

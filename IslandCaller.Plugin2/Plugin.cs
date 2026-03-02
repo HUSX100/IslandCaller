@@ -1,30 +1,51 @@
 ﻿using ClassIsland.Core;
 using ClassIsland.Core.Abstractions;
 using ClassIsland.Core.Attributes;
-using ClassIsland.Core.Controls;
 using ClassIsland.Core.Extensions.Registry;
 using ClassIsland.Shared;
+using IslandCaller.Helpers;
 using IslandCaller.Models;
-using IslandCaller.Plugin2.Services;
+using IslandCaller.Services;
 using IslandCaller.Services.IslandCallerService;
 using IslandCaller.Services.NotificationProvidersNew;
+using IslandCaller.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
 
 namespace IslandCaller
 {
     [PluginEntrance]
-    public class Plugin : PluginBase
+    public class Plugin : PluginBase, INotifyPropertyChanged
     {
+        private bool _pluginStatus;
+        public bool PluginStatus
+        {
+            get => _pluginStatus;
+            set
+            {
+                if (_pluginStatus != value)
+                {
+                    _pluginStatus = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PluginStatus)));
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         public override void Initialize(HostBuilderContext context, IServiceCollection services)
         {
+            PluginStatus = true;
             var logger = IAppHost.TryGetService<ILogger<Plugin>>();
             services.AddNotificationProvider<IslandCallerNotificationProviderNew>();
             services.AddSingleton<IslandCallerService>();
             services.AddSingleton<ProfileService>();
             services.AddSingleton<HistoryService>();
             services.AddSingleton<CoreService>();
+            services.AddSingleton<WindowDragHelper>();
+            services.AddSettingsPage<SettingPage>();
             AppBase.Current.AppStarted += async (_, _) =>
             {
                 try
@@ -40,13 +61,16 @@ namespace IslandCaller
                     logger.LogDebug("核心服务初始化完成，正在启动 IslandCaller 服务...");
                     IAppHost.GetService<IslandCallerService>();
                     logger.LogInformation("IslandCaller 插件初始化完成");
+                    new HoverFluent().Show();
                 }
                 catch (Exception ex)
                 {
+                    PluginStatus=false;
                     logger = IAppHost.GetService<ILogger<Plugin>>();
-                    logger.LogError($"初始化失败：{ex}");
-                    return;
+                    logger.LogCritical($"初始化失败：{ex}");
+                    throw;
                 }
+
             };
         }
     }

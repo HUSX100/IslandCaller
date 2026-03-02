@@ -1,7 +1,7 @@
 ﻿using IslandCaller.Models;
 using System.Text;
 
-namespace IslandCaller.Plugin2.Services
+namespace IslandCaller.Services
 {
     public class HistoryService(ProfileService profileService)
     {
@@ -126,11 +126,7 @@ namespace IslandCaller.Plugin2.Services
         public int GetLastCallIndex(string name)
         {
             int index = top20List.IndexOf(name);
-
-            if (index == -1)
-                return -1;
-
-            return index + 1;
+            return index;
         }
 
         // 获取长期平均次数
@@ -142,10 +138,10 @@ namespace IslandCaller.Plugin2.Services
         }
 
         // 清空长期记录
-        public void ClearLongTermHistory(Guid guid)
+        public void ClearLongTermHistory()
         {
             historyDict.Clear();
-            Save(guid);
+            Save(Settings.Instance.Profile.DefaultProfile);
         }
 
         // 清空短期记录

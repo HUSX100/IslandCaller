@@ -1,17 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace IslandCaller.Plugin2.Services
+namespace IslandCaller.Services
 {
     public class CoreService(ProfileService profileService, HistoryService historyService, ILogger<CoreService> logger)
     {
         private readonly ProfileService profileService = profileService;
         private readonly HistoryService historyService = historyService;
         private readonly ILogger<CoreService> logger = logger;
+        Random rand = new Random();
         internal class Person
         {
             internal int Id { get; set; }
@@ -26,6 +22,7 @@ namespace IslandCaller.Plugin2.Services
         internal void InitializeCore()
         {
             logger.LogInformation("初始化 Core 模块，加载学生信息...");
+            Persons.Clear();
             foreach (var person in profileService.Members)
             {
                 Persons.Add(new Person
@@ -49,11 +46,11 @@ namespace IslandCaller.Plugin2.Services
             // -----------------------------
             // 1. 本节课防重复因子（随时间恢复）
             // -----------------------------
-            const double fMin = 0.5;     // 最低值
-            const double beta = 0.54;    // 恢复速度参数（推荐值）
+            const double fMin = 0;     // 最低值
+            const double beta = 0.54;    // 恢复系数
 
             int deltaS = lastHitStep;
-            if (deltaS < 0) deltaS = 0;
+            if (deltaS < 0) deltaS = 15;
 
             // F_session = 1 - (1 - fMin) * exp(-beta * Δs)
             double F_session = 1 - (1 - fMin) * Math.Exp(-beta * deltaS);
@@ -62,12 +59,12 @@ namespace IslandCaller.Plugin2.Services
             // 2. 历史均衡因子
             // -----------------------------
             const double eps = 1.0;      // 平滑项
-            const double gamma = 0.7;    // 补偿强度
+            const double gamma = 0.9;    // 补偿强度
             const double rMin = 0.6;     // 最小补偿
             const double rMax = 1.6;     // 最大补偿
 
-            // F_history = clip( ((avgHist+1)/(nHist+1))^gamma , rMin, rMax )
-            double ratio = (avgHist + eps) / (nHist + eps);
+            // F_history = clip( ((manualWeight * avgHist + eps)/(nHist + eps))^gamma , rMin, rMax )
+            double ratio = (manualWeight * avgHist + eps) / (nHist + eps);
             double F_history = Math.Pow(ratio, gamma);
             F_history = Math.Max(rMin, Math.Min(rMax, F_history));
 
@@ -103,7 +100,6 @@ namespace IslandCaller.Plugin2.Services
             logger.LogTrace($"计算权重总和: {totalWeight}");
             if (totalWeight == 0) return "Error"; // 避免除以零
             // 生成一个 [0, totalWeight) 的随机数
-            Random rand = new Random();
             double r = rand.NextDouble() * totalWeight;
             logger.LogTrace($"生成随机数: {r} (范围: [0, {totalWeight}))");
             // 根据权重选择学生
