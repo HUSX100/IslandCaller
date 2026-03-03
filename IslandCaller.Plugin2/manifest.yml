@@ -15,3 +15,5 @@ icon: Icon.ico
 repoOwner: HUSX100
 repoName: IslandCaller
 assetsRoot: master/IslandCaller.Plugin2/
+artifactName: IslandCaller.Plugin2.cipx
+tagPattern: 2.*.**
