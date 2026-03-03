@@ -1,10 +1,13 @@
 <div align="center">
 
-# IslandCaller（ClassIsland 2.0 插件）
+# <image src="https://github.com/HUSX100/IslandCaller/blob/master/Icon.png" height="28" width="28"/> IslandCaller（ClassIsland 2.0 插件）
 
 一个为课堂场景设计的轻量级点名插件。  
 目标是：**上手快、抽取公平、课堂操作顺手**。
 
+[![正式版 Release](https://img.shields.io/github/v/release/HUSX100/IslandCaller?style=flat-square&color=%233fb950&label=正式版)](https://github.com/HUSX100/IslandCaller/releases/latest)
+[![下载量](https://img.shields.io/github/downloads/HUSX100/IslandCaller/total?style=social&label=下载量&logo=github)](https://github.com/HUSX100/IslandCaller/releases/latest)
+[![GitHub Repo Languages](https://img.shields.io/github/languages/top/HUSX100/IslandCaller?style=flat-square)](https://github.com/HUSX100/IslandCaller/search?l=c%23)
 </div>
 
 ---
