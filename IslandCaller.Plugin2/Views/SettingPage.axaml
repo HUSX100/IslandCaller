@@ -83,7 +83,7 @@
                             <DataGridTemplateColumn Header="性别">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <ToggleButton IsChecked="{Binding Gender, Converter={StaticResource IntToBoolConverter}}"
+                                        <ToggleButton IsChecked="{Binding Gender, Mode=TwoWay, Converter={StaticResource IntToBoolConverter}}"
                                                       Content="{Binding Gender, Converter={StaticResource GenderConverter}}">
                                         </ToggleButton>
                                     </DataTemplate>
