@@ -12,13 +12,15 @@ namespace IslandCaller.Helpers
         public async Task<List<Person>> ParseSecRandomProfileAsync(IStorageFile file, bool isGender, string? male, string? female)
         {
             string? path = file.Path.LocalPath;
-            logger.LogInformation($"获取到SecRandom Profile, 文件路径: {path}");
+            logger.LogInformation("开始解析 SecRandom 名单，文件路径: {Path}，是否读取性别: {IsGender}", path, isGender);
             using var stream = await file.OpenReadAsync();
             using var jsonDoc = await JsonDocument.ParseAsync(stream);
             var list = new List<Person>();
             int i = 0;
-            foreach(var person in jsonDoc.RootElement.EnumerateObject())
+            int rawCount = 0;
+            foreach (var person in jsonDoc.RootElement.EnumerateObject())
             {
+                rawCount++;
                 i++;
                 int gender = 0;
                 if (isGender)
@@ -40,6 +42,8 @@ namespace IslandCaller.Helpers
                     ManualWeight = 1.0
                 });
             }
+            logger.LogDebug("SecRandom 原始人数: {PersonCount}", rawCount);
+            logger.LogInformation("SecRandom 名单解析完成，成功导入 {Count} 人", list.Count);
             return list;
         }
     }

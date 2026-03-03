@@ -11,13 +11,14 @@ namespace IslandCaller.Helpers
         public async Task<List<Person>> ParseCsvFileAsync(IStorageFile file, int nameRow, int genderRow, string? male, string? female) 
         { 
             string? path = file.Path.LocalPath;
-            logger.LogInformation($"获取到CSV名单, 文件路径: {path}");
+            logger.LogInformation("开始解析 CSV 名单，文件路径: {Path}，姓名列: {NameRow}，性别列: {GenderRow}", path, nameRow, genderRow);
             string content;
             using var stream = await file.OpenReadAsync();
             using var reader = new StreamReader(stream);
             content = await reader.ReadToEndAsync();
             var list = new List<Person>();
             var lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            logger.LogDebug("CSV 原始行数: {LineCount}", lines.Length);
             for (int i = 0; i < lines.Length; i++)
             {
                 var columns = lines[i].Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -45,6 +46,7 @@ namespace IslandCaller.Helpers
                     });
                 }
             }
+            logger.LogInformation("CSV 名单解析完成，成功导入 {Count} 人", list.Count);
             return list;
         }
     }
