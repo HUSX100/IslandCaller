@@ -9,6 +9,56 @@ namespace IslandCaller.Models
         public static SettingsModel Instance { get; } = new SettingsModel();
         public ProfileService ProfileService { get; } = profileService;
 
+        private static string GetAppDataRootPath()
+        {
+            return Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "IslandCaller"
+            );
+        }
+
+        private static bool HasLegacyDefaultProfileFile()
+        {
+            string profilePath = Path.Combine(GetAppDataRootPath(), "Profile");
+            return File.Exists(Path.Combine(profilePath, "Default.csv")) ||
+                   File.Exists(Path.Combine(profilePath, "default.csv"));
+        }
+
+        private static void CleanupLegacyInstall()
+        {
+            string appDataRootPath = GetAppDataRootPath();
+
+            if (Directory.Exists(appDataRootPath))
+            {
+                Directory.Delete(appDataRootPath, recursive: true);
+            }
+
+            Registry.CurrentUser.DeleteSubKeyTree(@"Software\IslandCaller", throwOnMissingSubKey: false);
+        }
+
+        private void InitializeNewInstall()
+        {
+            RegistryKey IsC_RootKey = Registry.CurrentUser.CreateSubKey(@"Software\IslandCaller", writable: true);
+            RegistryKey IsC_GeneralKey = IsC_RootKey?.CreateSubKey("General", writable: true);
+            RegistryKey IsC_ProfileKey = IsC_RootKey?.CreateSubKey("Profile", writable: true);
+            RegistryKey IsC_HoverKey = IsC_RootKey?.CreateSubKey("Hover", writable: true);
+            RegistryKey IsC_HoverKey_Position = IsC_HoverKey?.CreateSubKey("Position", writable: true);
+
+            IsC_GeneralKey?.SetValue("BreakDisable", Instance.General.BreakDisable);
+            IsC_ProfileKey?.SetValue("ProfileNum", Instance.Profile.ProfileNum);
+            IsC_ProfileKey?.SetValue("DefaultProfileName", Instance.Profile.DefaultProfile.ToString());
+            IsC_ProfileKey?.SetValue("IsPreferProfile", Instance.Profile.IsPreferProfile);
+            IsC_ProfileKey?.SetValue("ProfileList", JsonSerializer.Serialize(Instance.Profile.ProfileList));
+            IsC_ProfileKey?.SetValue("PreferProfile", JsonSerializer.Serialize(Instance.Profile.ProfilePrefer));
+            IsC_HoverKey?.SetValue("IsEnable", Instance.Hover.IsEnable);
+            IsC_HoverKey?.SetValue("ScalingFactor", Instance.Hover.ScalingFactor);
+            IsC_HoverKey_Position?.SetValue("X", Instance.Hover.Position.X);
+            IsC_HoverKey_Position?.SetValue("Y", Instance.Hover.Position.Y);
+
+            ProfileService.CreateDemoProfile(Instance.Profile.DefaultProfile);
+            ClassIsland.Core.Controls.CommonTaskDialogs.ShowDialog("Welcome", "欢迎使用IslandCaller2.0");
+        }
+
         public void Load()
         {
             RegistryKey IsC_RootKey = Registry.CurrentUser.OpenSubKey(@"Software\IslandCaller", writable: true);
@@ -19,28 +69,18 @@ namespace IslandCaller.Models
 
             if (IsC_RootKey == null)
             {
-                IsC_RootKey = Registry.CurrentUser.CreateSubKey(@"Software\IslandCaller", writable: true);
-                IsC_GeneralKey = IsC_RootKey?.CreateSubKey("General", writable: true);
-                IsC_ProfileKey = IsC_RootKey?.CreateSubKey("Profile", writable: true);
-                IsC_HoverKey = IsC_RootKey?.CreateSubKey("Hover", writable: true);
-                IsC_HoverKey_Position = IsC_HoverKey?.CreateSubKey("Position", writable: true);
-
-                IsC_GeneralKey?.SetValue("BreakDisable", Instance.General.BreakDisable);
-                IsC_ProfileKey?.SetValue("ProfileNum", Instance.Profile.ProfileNum);
-                IsC_ProfileKey?.SetValue("DefaultProfileName", Instance.Profile.DefaultProfile.ToString());
-                IsC_ProfileKey?.SetValue("IsPreferProfile", Instance.Profile.IsPreferProfile);
-                IsC_ProfileKey?.SetValue("ProfileList", JsonSerializer.Serialize(Instance.Profile.ProfileList));
-                IsC_ProfileKey?.SetValue("PreferProfile", JsonSerializer.Serialize(Instance.Profile.ProfilePrefer));
-                IsC_HoverKey?.SetValue("IsEnable", Instance.Hover.IsEnable);
-                IsC_HoverKey?.SetValue("ScalingFactor", Instance.Hover.ScalingFactor);
-                IsC_HoverKey_Position?.SetValue("X", Instance.Hover.Position.X);
-                IsC_HoverKey_Position?.SetValue("Y", Instance.Hover.Position.Y);
-
-                ProfileService.CreateDemoProfile(Instance.Profile.DefaultProfile);
-                ClassIsland.Core.Controls.CommonTaskDialogs.ShowDialog("Welcome", "欢迎使用IslandCaller2.0");
+                InitializeNewInstall();
             }
             else
             {
+                if (HasLegacyDefaultProfileFile())
+                {
+                    CleanupLegacyInstall();
+                    InitializeNewInstall();
+                    SettingsBinder.Bind(Instance, Save);
+                    return;
+                }
+
                 IsC_GeneralKey = IsC_RootKey?.OpenSubKey("General", writable: true);
                 IsC_ProfileKey = IsC_RootKey?.OpenSubKey("Profile", writable: true);
                 IsC_HoverKey = IsC_RootKey?.OpenSubKey("Hover", writable: true);
