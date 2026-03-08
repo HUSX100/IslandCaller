@@ -29,7 +29,7 @@
         <fa:SettingsExpander
         IconSource="{ci:FluentIconSource &#xE4CE;}"
         Header="下课禁用"
-        Description="在非上课时间禁用所有点名功能">
+        Description="在课间禁用所有点名功能">
 		    <fa:SettingsExpander.Footer>
 			    <ToggleSwitch
                 IsChecked="{Binding IsBreakDisable, Mode=TwoWay}"/>
