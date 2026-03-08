@@ -45,6 +45,7 @@ namespace IslandCaller
             services.AddSingleton<HistoryService>();
             services.AddSingleton<CoreService>();
             services.AddSingleton<WindowDragHelper>();
+            services.AddSingleton<WindowTopmostHelper>();
             services.AddSettingsPage<SettingPage>();
             AppBase.Current.AppStarted += async (_, _) =>
             {
