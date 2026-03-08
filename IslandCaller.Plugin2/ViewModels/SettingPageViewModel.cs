@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using IslandCaller.Models;
 using IslandCaller.Services;
+using IslandCaller.Views;
 using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -88,6 +89,7 @@ namespace IslandCaller.ViewModels
             ProfileService profileService = IAppHost.GetService<ProfileService>();
             HistoryService historyService = IAppHost.GetService<HistoryService>();
             CoreService coreService = IAppHost.GetService<CoreService>();
+            Plugin plugin = IAppHost.GetService<Plugin>();
 
             // 初始化默认值
             IsBreakDisable = Settings.Instance.General.BreakDisable;
@@ -113,6 +115,12 @@ namespace IslandCaller.ViewModels
                 else if (args.PropertyName == nameof(IsHoverEnable))
                 {
                     Settings.Instance.Hover.IsEnable = IsHoverEnable;
+                    if (IsHoverEnable)
+                    {
+                        plugin.HoverWindow = new HoverFluent();
+                        plugin.HoverWindow.Show();
+                    }
+                    else plugin.HoverWindow.Close();
                 }
                 else if (args.PropertyName == nameof(HoverScalingFactor))
                 {

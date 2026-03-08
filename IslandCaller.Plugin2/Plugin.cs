@@ -1,4 +1,5 @@
-﻿using ClassIsland.Core;
+﻿using Avalonia.Controls;
+using ClassIsland.Core;
 using ClassIsland.Core.Abstractions;
 using ClassIsland.Core.Attributes;
 using ClassIsland.Core.Extensions.Registry;
@@ -33,6 +34,8 @@ namespace IslandCaller
             }
         }
 
+        public Window HoverWindow { get; set; }
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public override void Initialize(HostBuilderContext context, IServiceCollection services)
@@ -62,7 +65,11 @@ namespace IslandCaller
                     logger.LogDebug("核心服务初始化完成，正在启动 IslandCaller 服务...");
                     IAppHost.GetService<IslandCallerService>();
                     logger.LogInformation("IslandCaller 插件初始化完成");
-                    new HoverFluent().Show();
+                    if (Settings.Instance.Hover.IsEnable)
+                    {
+                        HoverWindow = new HoverFluent();
+                        HoverWindow.Show();
+                    }
                 }
                 catch (Exception ex)
                 {
