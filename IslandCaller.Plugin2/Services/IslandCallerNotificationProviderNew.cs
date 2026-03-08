@@ -19,7 +19,6 @@ public class IslandCallerNotificationProviderNew(ILessonsService lessonsService,
 
     public async void RandomCall(int stunum)
     {
-        if (Settings.Instance.General.BreakDisable & lessonsService.CurrentState == TimeState.Breaking) return;
         var sb = new StringBuilder();
         for (int i = 0; i < stunum; i++)
         {
