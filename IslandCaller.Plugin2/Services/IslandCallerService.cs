@@ -1,6 +1,8 @@
 ﻿using IslandCaller.Services.NotificationProvidersNew;
 using ClassIsland.Core.Abstractions.Services;
 using IslandCaller.Views;
+using ClassIsland.Shared.Enums;
+using IslandCaller.Models;
 
 namespace IslandCaller.Services.IslandCallerService
 {
@@ -23,6 +25,8 @@ namespace IslandCaller.Services.IslandCallerService
             lessonsService.CurrentTimeStateChanged += (s, e) =>
             {
                 historyService.ClearThisLessonHistory();
+                if (Settings.Instance.General.BreakDisable & lessonsService.CurrentState == TimeState.Breaking) plugin.PluginStatus = false;
+                else plugin.PluginStatus = true;
             };
             uriNavigationService.HandlePluginsNavigation(
                 "IslandCaller/Simple",
@@ -42,6 +46,7 @@ namespace IslandCaller.Services.IslandCallerService
 
         public async void ShowRandomStudent(int stunum)
         {
+            if(Plugin.PluginStatus == false) return;
             Plugin.PluginStatus = false;
             new IslandCallerNotificationProviderNew(LessonsService, CoreService).RandomCall(stunum);
             await Task.Delay(stunum * 2000 + 1000);
