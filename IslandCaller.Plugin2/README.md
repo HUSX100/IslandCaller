@@ -64,7 +64,7 @@
 - 简单抽取（1 人）
 
 ```text
-classisland://plugins/IslandCaller/Simple
+classisland://plugins/IslandCaller/Simple/1
 ```
 
 - 高级抽取（GUI 指定人数）
