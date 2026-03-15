@@ -11,7 +11,7 @@ namespace IslandCaller.Services.NotificationProvidersNew;
 [NotificationProviderInfo(
     "9B570BF1-9A32-40C0-9D5D-4FFA69E03A37",
     "IslandCallerServices",
-    "\uE939",
+    "\uECEF",
     "用于为IslandCaller提供通知接口")]
 public class IslandCallerNotificationProviderNew(ILessonsService lessonsService,CoreService coreService) : NotificationProviderBase
 {
