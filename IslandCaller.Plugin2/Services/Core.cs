@@ -2,11 +2,12 @@
 
 namespace IslandCaller.Services
 {
-    public class CoreService(ProfileService profileService, HistoryService historyService, ILogger<CoreService> logger)
+    public class CoreService(ProfileService profileService, HistoryService historyService, ILogger<CoreService> logger, Status status)
     {
         private readonly ProfileService profileService = profileService;
         private readonly HistoryService historyService = historyService;
         private readonly ILogger<CoreService> logger = logger;
+        private readonly Status status = status;
         Random rand = new Random();
         internal class Person
         {
@@ -21,6 +22,7 @@ namespace IslandCaller.Services
 
         internal void InitializeCore()
         {
+            status.IsTimeStatusAvailable = false;
             logger.LogInformation("初始化 Core 模块，加载学生信息...");
             Persons.Clear();
             foreach (var person in profileService.Members)
@@ -35,6 +37,7 @@ namespace IslandCaller.Services
                 });
             }
             ComputeWeightsForAllStudents();
+            status.CoreServiceInitialized = true;
         }
 
         private double ComputeSingleWeight(
