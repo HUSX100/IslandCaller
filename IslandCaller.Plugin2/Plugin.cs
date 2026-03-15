@@ -18,30 +18,14 @@ using System.ComponentModel;
 namespace IslandCaller
 {
     [PluginEntrance]
-    public class Plugin : PluginBase, INotifyPropertyChanged
+    public class Plugin : PluginBase
     {
-        private bool _pluginStatus;
-        public bool PluginStatus
-        {
-            get => _pluginStatus;
-            set
-            {
-                if (_pluginStatus != value)
-                {
-                    _pluginStatus = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PluginStatus)));
-                }
-            }
-        }
-
         public Window HoverWindow { get; set; }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public override void Initialize(HostBuilderContext context, IServiceCollection services)
         {
-            PluginStatus = true;
             var logger = IAppHost.TryGetService<ILogger<Plugin>>();
+            services.AddSingleton<Status>();
             services.AddNotificationProvider<IslandCallerNotificationProviderNew>();
             services.AddSingleton<IslandCallerService>();
             services.AddSingleton<ProfileService>();
@@ -55,6 +39,8 @@ namespace IslandCaller
                 try
                 {
                     logger = IAppHost.GetService<ILogger<Plugin>>();
+                    IAppHost.GetService<Status>();
+                    logger.LogInformation("插件状态初始化完成，正在加载设置...");
                     new Settings(IAppHost.GetService<ProfileService>()).Load();
                     logger.LogDebug("设置加载完成，正在加载默认配置...");
                     IAppHost.GetService<ProfileService>().LoadSelectedProfile(Settings.Instance.Profile.DefaultProfile);
@@ -73,7 +59,6 @@ namespace IslandCaller
                 }
                 catch (Exception ex)
                 {
-                    PluginStatus=false;
                     logger = IAppHost.GetService<ILogger<Plugin>>();
                     logger.LogCritical($"初始化失败：{ex}");
                     throw;

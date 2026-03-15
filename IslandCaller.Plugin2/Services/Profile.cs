@@ -34,6 +34,8 @@ namespace IslandCaller.Services
         public void LoadSelectedProfile(Guid guid)
         {
             var logger = IAppHost.GetService<ILogger<ProfileService>>();
+            var status = IAppHost.GetService<Status>();
+            status.ProfileServiceInitialized = false;
             // 构建路径
 
             string filePath = Path.Combine(GetFilePath(guid));
@@ -87,6 +89,7 @@ namespace IslandCaller.Services
                 });
             }
             Members = Members.OrderBy(x => x.Id).ToList();
+            status.ProfileServiceInitialized = true;
         }
 
         // 获取名单

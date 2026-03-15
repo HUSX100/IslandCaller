@@ -10,7 +10,7 @@ entranceAssembly: "IslandCaller.Plugin2.dll"
 url: https://github.com/HUSX100/IslandCaller
 author: HUSX100
 version: 2.0.0.1
-apiVersion: 2.0.0.2
+apiVersion: 2.0.1.0
 icon: Icon.ico
 repoOwner: HUSX100
 repoName: IslandCaller

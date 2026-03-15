@@ -11,22 +11,33 @@ namespace IslandCaller.Services.IslandCallerService
         private ILessonsService LessonsService { get; }
         private CoreService CoreService {  get; }
         private Plugin Plugin { get; }
+        public Status Status { get; set; }
         public IslandCallerService(Plugin plugin, 
                                     IUriNavigationService uriNavigationService, 
                                     ILessonsService lessonsService,
                                     HistoryService historyService,
-                                    CoreService coreService
+                                    CoreService coreService,
+                                    Status status
             )
         {
             
             LessonsService = lessonsService;
             CoreService = coreService;
             Plugin = plugin;
+            Status = status;
+            status.IslandCallerServiceInitialized = false;
+            Status.IsTimeStatusAvailable = !(Settings.Instance.General.BreakDisable & lessonsService.CurrentState == TimeState.Breaking);
             lessonsService.CurrentTimeStateChanged += (s, e) =>
             {
                 historyService.ClearThisLessonHistory();
-                if (Settings.Instance.General.BreakDisable & lessonsService.CurrentState == TimeState.Breaking) plugin.PluginStatus = false;
-                else plugin.PluginStatus = true;
+                Status.IsTimeStatusAvailable = !(Settings.Instance.General.BreakDisable & lessonsService.CurrentState == TimeState.Breaking);
+            };
+            Settings.Instance.General.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(Settings.Instance.General.BreakDisable))
+                {
+                    Status.IsTimeStatusAvailable = !(Settings.Instance.General.BreakDisable & lessonsService.CurrentState == TimeState.Breaking);
+                }
             };
             uriNavigationService.HandlePluginsNavigation(
                 "IslandCaller/Simple",
@@ -42,15 +53,16 @@ namespace IslandCaller.Services.IslandCallerService
                     new PersonalCall().Show();
                 }
             );
+            status.IslandCallerServiceInitialized = true;
         }
 
         public async void ShowRandomStudent(int stunum)
         {
-            if(Plugin.PluginStatus == false) return;
-            Plugin.PluginStatus = false;
+            if(Status.IsPluginReady == false) return;
+            Status.OccupationDisable = false;
             new IslandCallerNotificationProviderNew(LessonsService, CoreService).RandomCall(stunum);
             await Task.Delay(stunum * 2000 + 1000);
-            Plugin.PluginStatus = true;
+            Status.OccupationDisable = true;
         }
     }
 }

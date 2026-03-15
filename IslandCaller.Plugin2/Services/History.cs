@@ -3,11 +3,12 @@ using System.Text;
 
 namespace IslandCaller.Services
 {
-    public class HistoryService(ProfileService profileService)
+    public class HistoryService(ProfileService profileService, Status status)
     {
         private Dictionary<string, int> historyDict = new();
         private List<string> top20List = new();
         private ProfileService profileService = profileService;
+        private Status Status = status;
 
         private string GetBasePath()
         {
@@ -26,6 +27,7 @@ namespace IslandCaller.Services
         // 载入长期历史（只加载 Dictionary）
         public void Load(Guid guid)
         {
+            Status.HistoryServiceInitialized = false;
             historyDict.Clear();
 
             string filePath = GetFilePath(guid);
@@ -68,6 +70,7 @@ namespace IslandCaller.Services
                     historyDict[name] = 0;       // CSV 没有 → 记为 0
                 }
             }
+            Status.HistoryServiceInitialized = true;
         }
 
         // 写入历史

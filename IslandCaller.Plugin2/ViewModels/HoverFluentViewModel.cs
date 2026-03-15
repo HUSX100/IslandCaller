@@ -1,5 +1,6 @@
 ﻿using ClassIsland.Shared;
 using IslandCaller.Models;
+using IslandCaller.Services;
 using ReactiveUI;
 
 namespace IslandCaller.ViewModels
@@ -21,7 +22,7 @@ namespace IslandCaller.ViewModels
         }
 
         public string Glyph1 => IsEnabled ? "\uECF8" : "\uED08";
-        public string Glyph2 => IsEnabled ? "\uED38" : "\uED08";
+        public string Glyph2 => IsEnabled ? "\uED42" : "\uED08";
 
         private double _height;
         public double Height
@@ -103,13 +104,13 @@ namespace IslandCaller.ViewModels
                     ButtonHeight = Height * 0.8;
                 }
             };
-            var plugin = IAppHost.GetService<Plugin>();
-            IsEnabled = plugin.PluginStatus;
-            plugin.PropertyChanged += (sender, e) =>
+            var status = IAppHost.GetService<Status>();
+            IsEnabled = status.IsPluginReady;
+            status.PropertyChanged += (sender, e) =>
             {
-                if (e.PropertyName == nameof(plugin.PluginStatus))
+                if (e.PropertyName == nameof(status.IsPluginReady))
                 {
-                    IsEnabled = plugin.PluginStatus;
+                    IsEnabled = status.IsPluginReady;
                 }
             };
             this.WhenAnyValue(x => x.IsEnabled)

@@ -16,7 +16,7 @@ using static IslandCaller.ViewModels.SettingPageViewModel;
 
 namespace IslandCaller.Views;
 
-[SettingsPageInfo("plugins.IslandCaller", "IslandCaller 设置", "\uECF9", "\uECF8", SettingsPageCategory.External)]
+[SettingsPageInfo("plugins.IslandCaller", "IslandCaller 设置", "\uED39", "\uECF8", SettingsPageCategory.External)]
 public partial class SettingPage : SettingsPageBase
 {
     private SettingPageViewModel vm;
