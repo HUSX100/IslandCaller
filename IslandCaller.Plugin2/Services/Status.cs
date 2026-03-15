@@ -61,7 +61,6 @@ namespace IslandCaller.Services
             IslandCallerServiceInitialized = false;
             IsTimeStatusAvailable = false;
             OccupationDisable = true;
-            IsPluginReady = false;
 
             this.WhenAnyValue(
                 x => x.ProfileServiceInitialized,

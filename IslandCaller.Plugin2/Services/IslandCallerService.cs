@@ -25,6 +25,8 @@ namespace IslandCaller.Services.IslandCallerService
             CoreService = coreService;
             Plugin = plugin;
             Status = status;
+            status.IslandCallerServiceInitialized = false;
+            Status.IsTimeStatusAvailable = !(Settings.Instance.General.BreakDisable & lessonsService.CurrentState == TimeState.Breaking);
             lessonsService.CurrentTimeStateChanged += (s, e) =>
             {
                 historyService.ClearThisLessonHistory();
@@ -51,6 +53,7 @@ namespace IslandCaller.Services.IslandCallerService
                     new PersonalCall().Show();
                 }
             );
+            status.IslandCallerServiceInitialized = true;
         }
 
         public async void ShowRandomStudent(int stunum)
