@@ -34,6 +34,7 @@ public partial class HoverFluent : Window
         logger.LogInformation("HoverFluent 悬浮窗初始化成功");
 
         StartTopmostLoop();
+        windowTopmostHelper.EnsureNoActivate(this);
         ApplyTopmost("窗口打开");
     }
 

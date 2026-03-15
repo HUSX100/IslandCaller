@@ -6,6 +6,7 @@
              xmlns:vm="using:IslandCaller.ViewModels"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             Focusable="False"
              x:Class="IslandCaller.Controls.HoverFluentControl">
     <UserControl.DataContext>
         <vm:HoverFluentViewModel />
@@ -15,22 +16,23 @@
     </Design.DataContext>
     <Grid
     HorizontalAlignment="Center"
-    VerticalAlignment="Center">
+    VerticalAlignment="Center"
+    Focusable="False">
       <Button
         x:Name="Button1"
         Height="56"
         Width="88"
         Classes="accent"
+        Focusable="False"
         IsEnabled="{Binding IsEnabled}">
-          <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Focusable="False">
               <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="Auto"/>
                   <ColumnDefinition Width="3"/>
                   <ColumnDefinition Width="Auto"/>
               </Grid.ColumnDefinitions>
-              <ci:FluentIcon Glyph="{Binding Glyph1}" FontSize="28" Grid.Column="0">
-              </ci:FluentIcon>
-              <TextBlock Text="Call" FontFamily="HarmonyOS Sans SC" FontWeight="Medium" FontSize="21" Grid.Column="2" VerticalAlignment="Center"/>
+              <ci:FluentIcon Glyph="{Binding Glyph1}" FontSize="28" Focusable="False" Grid.Column="0"/>
+              <TextBlock Text="Call" FontFamily="HarmonyOS Sans SC" FontWeight="Medium" FontSize="21" Grid.Column="2" VerticalAlignment="Center" Focusable="False"/>
           </Grid>
       </Button>
       <Button
@@ -40,9 +42,9 @@
         Margin="95,0,0,0"
         IsEnabled="{Binding IsEnabled}"
         HorizontalAlignment="Center"
-        VerticalAlignment="Center">
-          <ci:FluentIcon Glyph="{Binding Glyph2}" FontSize="28"/>
+        VerticalAlignment="Center"
+        Focusable="False">
+          <ci:FluentIcon Glyph="{Binding Glyph2}" FontSize="28" Focusable="False"/>
       </Button>
   </Grid>
-  
 </UserControl>
