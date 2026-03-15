@@ -22,7 +22,7 @@ namespace IslandCaller.ViewModels
         }
 
         public string Glyph1 => IsEnabled ? "\uECF8" : "\uED08";
-        public string Glyph2 => IsEnabled ? "\uED38" : "\uED42";
+        public string Glyph2 => IsEnabled ? "\uED42" : "\uED08";
 
         private double _height;
         public double Height
