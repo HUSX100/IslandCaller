@@ -11,6 +11,7 @@ public partial class HoverFluent : Window
 {
     private HoverFluentViewModel vm { get; set; }
     private double scaling { get; set; }
+    private bool _isDragging;
     private readonly ILogger<HoverFluent> logger = ClassIsland.Shared.IAppHost.GetService<ILogger<HoverFluent>>();
     private readonly IslandCallerService IslandCallerService = ClassIsland.Shared.IAppHost.GetService<IslandCallerService>();
     private readonly WindowTopmostHelper windowTopmostHelper = ClassIsland.Shared.IAppHost.GetService<WindowTopmostHelper>();
@@ -92,15 +93,49 @@ public partial class HoverFluent : Window
 
     private void OnPositionChanged(object? sender, PixelPointEventArgs e)
     {
-        var screen = Screens.ScreenFromWindow(this)?.Bounds ?? Screens.Primary.Bounds;
         scaling = RenderScaling;
         var logger = ClassIsland.Shared.IAppHost.GetService<ILogger<HoverFluent>>();
         logger.LogDebug($"窗口位置改变: X={Position.X}, Y={Position.Y}");
 
-        int x = Position.X;
-        int y = Position.Y;
-        int w = (int)Width;
-        int h = (int)Height;
+        if (_isDragging)
+        {
+            UpdateViewModelPosition(Position.X, Position.Y);
+            return;
+        }
+
+        ApplyPositionClampIfNeeded();
+    }
+
+    public void BeginDrag()
+    {
+        _isDragging = true;
+    }
+
+    public void EndDragAndClamp()
+    {
+        _isDragging = false;
+        ApplyPositionClampIfNeeded();
+    }
+
+    private void ApplyPositionClampIfNeeded()
+    {
+        var clamped = ClampPositionToWorkingArea(Position);
+        if (clamped != Position)
+        {
+            Position = clamped;
+        }
+        UpdateViewModelPosition(clamped.X, clamped.Y);
+    }
+
+    private PixelPoint ClampPositionToWorkingArea(PixelPoint current)
+    {
+        var screen = Screens.ScreenFromWindow(this)?.WorkingArea ?? Screens.Primary.WorkingArea;
+        scaling = RenderScaling;
+
+        int x = current.X;
+        int y = current.Y;
+        int w = (int)Math.Round(Bounds.Width * scaling);
+        int h = (int)Math.Round(Bounds.Height * scaling);
 
         if (x < screen.X) x = screen.X;
         if (y < screen.Y) y = screen.Y;
@@ -115,11 +150,11 @@ public partial class HoverFluent : Window
             logger.LogInformation("调整Y坐标以适应屏幕");
         }
 
-        if (x != Position.X || y != Position.Y)
-        {
-            Position = new PixelPoint(x, y);
-        }
+        return new PixelPoint(x, y);
+    }
 
+    private void UpdateViewModelPosition(int x, int y)
+    {
         vm.PositionX = x / scaling;
         vm.PositionY = y / scaling;
     }

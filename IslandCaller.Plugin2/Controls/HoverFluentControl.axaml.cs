@@ -41,9 +41,12 @@ public partial class HoverFluentControl : UserControl
         _lastDragTime = Environment.TickCount64;
         // 触发窗口拖动
         parentwindow = this.GetVisualRoot() as Window;
+        var hoverWindow = parentwindow as HoverFluent;
         lastWindowPosition = parentwindow.Position;
+        hoverWindow?.BeginDrag();
         await windowDragHelper.DragMoveAsync(parentwindow, e.Pointer.Type);
         logger.LogDebug("Button1_PointerPressed: 窗口拖动结束");
+        hoverWindow?.EndDragAndClamp();
         if(parentwindow.Position == lastWindowPosition)
         {
             logger.LogDebug("Button1_PointerPressed: 窗口位置未变化，触发点击事件");
@@ -63,9 +66,12 @@ public partial class HoverFluentControl : UserControl
         _lastDragTime = Environment.TickCount64;
         // 触发窗口拖动
         parentwindow = this.GetVisualRoot() as Window;
+        var hoverWindow = parentwindow as HoverFluent;
         lastWindowPosition = parentwindow.Position;
+        hoverWindow?.BeginDrag();
         await windowDragHelper.DragMoveAsync(parentwindow, e.Pointer.Type);
         logger.LogDebug("Button2_PointerPressed: 窗口拖动结束");
+        hoverWindow?.EndDragAndClamp();
         if (parentwindow.Position == lastWindowPosition)
         {
             logger.LogDebug("Button2_PointerPressed: 窗口位置未变化，触发点击事件");
