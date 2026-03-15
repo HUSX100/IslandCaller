@@ -19,6 +19,11 @@ public partial class HoverFluentControl : UserControl
     public PixelPoint lastWindowPosition { get; set; }
     private WindowDragHelper windowDragHelper { get; set; }
     private long _lastDragTime;
+    private bool _isManualDragging;
+    private IPointer? _dragPointer;
+    private PixelPoint _dragStartWindowPosition;
+    private Point _dragStartPointerPosition;
+    private DragClickAction _pendingClickAction = DragClickAction.None;
     public HoverFluentControl()
     {
         IslandCallerService = IAppHost.GetService<IslandCallerService>();
@@ -27,6 +32,12 @@ public partial class HoverFluentControl : UserControl
         InitializeComponent();
         Button1.AddHandler(InputElement.PointerPressedEvent, Button1_PointerPressed, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
         Button2.AddHandler(InputElement.PointerPressedEvent, Button2_PointerPressed, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
+        Button1.AddHandler(InputElement.PointerMovedEvent, DragPointerMoved, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
+        Button2.AddHandler(InputElement.PointerMovedEvent, DragPointerMoved, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
+        Button1.AddHandler(InputElement.PointerReleasedEvent, DragPointerReleased, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
+        Button2.AddHandler(InputElement.PointerReleasedEvent, DragPointerReleased, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
+        Button1.AddHandler(InputElement.PointerCaptureLostEvent, DragPointerCaptureLost, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
+        Button2.AddHandler(InputElement.PointerCaptureLostEvent, DragPointerCaptureLost, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
     }
     private async void Button1_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
     {
@@ -41,8 +52,17 @@ public partial class HoverFluentControl : UserControl
         _lastDragTime = Environment.TickCount64;
         // 触发窗口拖动
         parentwindow = this.GetVisualRoot() as Window;
+        if (parentwindow == null)
+        {
+            logger.LogWarning("Button1_PointerPressed: 无法获取窗口句柄，跳过拖动。");
+            return;
+        }
         var hoverWindow = parentwindow as HoverFluent;
         lastWindowPosition = parentwindow.Position;
+        if (TryStartManualDrag(parentwindow, e, DragClickAction.Button1, sender as IInputElement))
+        {
+            return;
+        }
         hoverWindow?.BeginDrag();
         await windowDragHelper.DragMoveAsync(parentwindow, e.Pointer.Type);
         logger.LogDebug("Button1_PointerPressed: 窗口拖动结束");
@@ -66,8 +86,17 @@ public partial class HoverFluentControl : UserControl
         _lastDragTime = Environment.TickCount64;
         // 触发窗口拖动
         parentwindow = this.GetVisualRoot() as Window;
+        if (parentwindow == null)
+        {
+            logger.LogWarning("Button2_PointerPressed: 无法获取窗口句柄，跳过拖动。");
+            return;
+        }
         var hoverWindow = parentwindow as HoverFluent;
         lastWindowPosition = parentwindow.Position;
+        if (TryStartManualDrag(parentwindow, e, DragClickAction.Button2, sender as IInputElement))
+        {
+            return;
+        }
         hoverWindow?.BeginDrag();
         await windowDragHelper.DragMoveAsync(parentwindow, e.Pointer.Type);
         logger.LogDebug("Button2_PointerPressed: 窗口拖动结束");
@@ -77,5 +106,98 @@ public partial class HoverFluentControl : UserControl
             logger.LogDebug("Button2_PointerPressed: 窗口位置未变化，触发点击事件");
             await new PersonalCall().ShowDialog(parentwindow);
         }
+    }
+
+    private bool TryStartManualDrag(Window window, PointerPressedEventArgs e, DragClickAction clickAction, IInputElement? captureTarget)
+    {
+        if (e.Pointer.Type != PointerType.Touch && e.Pointer.Type != PointerType.Pen)
+        {
+            return false;
+        }
+
+        _isManualDragging = true;
+        _dragPointer = e.Pointer;
+        _dragStartPointerPosition = e.GetPosition(window);
+        _dragStartWindowPosition = window.Position;
+        _pendingClickAction = clickAction;
+
+        if (window is HoverFluent hoverWindow)
+        {
+            hoverWindow.BeginDrag();
+        }
+
+        e.Pointer.Capture(captureTarget ?? this);
+        logger.LogDebug("开始手动拖动，PointerType: {PointerType}", e.Pointer.Type);
+        return true;
+    }
+
+    private void DragPointerMoved(object? sender, PointerEventArgs e)
+    {
+        if (!_isManualDragging || _dragPointer == null || e.Pointer != _dragPointer || parentwindow == null)
+        {
+            return;
+        }
+
+        var current = e.GetPosition(parentwindow);
+        var scaling = parentwindow.RenderScaling;
+        var deltaX = (current.X - _dragStartPointerPosition.X) * scaling;
+        var deltaY = (current.Y - _dragStartPointerPosition.Y) * scaling;
+        var newPosition = new PixelPoint(
+            _dragStartWindowPosition.X + (int)Math.Round(deltaX),
+            _dragStartWindowPosition.Y + (int)Math.Round(deltaY));
+
+        if (parentwindow.Position != newPosition)
+        {
+            parentwindow.Position = newPosition;
+        }
+    }
+
+    private async void DragPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        await EndManualDragAsync(e.Pointer);
+    }
+
+    private async void DragPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
+    {
+        await EndManualDragAsync(e.Pointer);
+    }
+
+    private async Task EndManualDragAsync(IPointer pointer)
+    {
+        if (!_isManualDragging || _dragPointer == null || pointer != _dragPointer)
+        {
+            return;
+        }
+
+        _isManualDragging = false;
+        _dragPointer = null;
+        pointer.Capture(null);
+
+        if (parentwindow is HoverFluent hoverWindow)
+        {
+            hoverWindow.EndDragAndClamp();
+        }
+
+        if (parentwindow != null && parentwindow.Position == lastWindowPosition)
+        {
+            logger.LogDebug("手动拖动未改变窗口位置，触发点击事件");
+            if (_pendingClickAction == DragClickAction.Button1)
+            {
+                IslandCallerService.ShowRandomStudent(1);
+            }
+            else if (_pendingClickAction == DragClickAction.Button2)
+            {
+                await new PersonalCall().ShowDialog(parentwindow);
+            }
+        }
+
+        _pendingClickAction = DragClickAction.None;
+    }
+
+    private enum DragClickAction
+    {
+        None,
+        Button1,
+        Button2
     }
 }

@@ -12,9 +12,12 @@ public partial class HoverFluent : Window
     private HoverFluentViewModel vm { get; set; }
     private double scaling { get; set; }
     private bool _isDragging;
+    private long _lastPositionLogTime;
+    private const int PositionLogIntervalMs = 200;
     private readonly ILogger<HoverFluent> logger = ClassIsland.Shared.IAppHost.GetService<ILogger<HoverFluent>>();
     private readonly IslandCallerService IslandCallerService = ClassIsland.Shared.IAppHost.GetService<IslandCallerService>();
     private readonly WindowTopmostHelper windowTopmostHelper = ClassIsland.Shared.IAppHost.GetService<WindowTopmostHelper>();
+    private readonly WindowDragHelper windowDragHelper = ClassIsland.Shared.IAppHost.GetService<WindowDragHelper>();
     private CancellationTokenSource? topmostCts;
 
     public HoverFluent()
@@ -33,6 +36,16 @@ public partial class HoverFluent : Window
         Deactivated += OnWindowLayerChanged;
         logger.LogDebug($"HoverFluent 坐标: PositionX={(int)Math.Round(vm.PositionX * scaling)}, PositionY={(int)Math.Round(vm.PositionY * scaling)}");
         logger.LogInformation("HoverFluent 悬浮窗初始化成功");
+
+        var platformHandle = TryGetPlatformHandle();
+        if (platformHandle == null)
+        {
+            logger.LogWarning("无法获取窗口句柄，取消触控输入注册失败。");
+        }
+        else
+        {
+            windowDragHelper.EnsureTouchInputDisabled(platformHandle.Handle);
+        }
 
         StartTopmostLoop();
         windowTopmostHelper.EnsureNoActivate(this);
@@ -94,13 +107,16 @@ public partial class HoverFluent : Window
     private void OnPositionChanged(object? sender, PixelPointEventArgs e)
     {
         scaling = RenderScaling;
-        var logger = ClassIsland.Shared.IAppHost.GetService<ILogger<HoverFluent>>();
-        logger.LogDebug($"窗口位置改变: X={Position.X}, Y={Position.Y}");
-
         if (_isDragging)
         {
-            UpdateViewModelPosition(Position.X, Position.Y);
             return;
+        }
+
+        var now = Environment.TickCount64;
+        if (now - _lastPositionLogTime >= PositionLogIntervalMs)
+        {
+            logger.LogDebug($"窗口位置改变: X={Position.X}, Y={Position.Y}");
+            _lastPositionLogTime = now;
         }
 
         ApplyPositionClampIfNeeded();
