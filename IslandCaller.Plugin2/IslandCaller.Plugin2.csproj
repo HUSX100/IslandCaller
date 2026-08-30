@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
@@ -12,7 +12,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <ClassIslandPluginSdkVersion>2.1.1</ClassIslandPluginSdkVersion>
+        <ClassIslandPluginSdkVersion>2.1.1.1</ClassIslandPluginSdkVersion>
         <WindowsSdkNetVersion>10.0.26100.87</WindowsSdkNetVersion>
         <!-- Use the SDK projection version required by MorerialsAvalonia while keeping 19041 as the OS floor. -->
         <WindowsSdkPackageVersion>$(WindowsSdkNetVersion)</WindowsSdkPackageVersion>
@@ -24,25 +24,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ClassIsland.PluginSdk" Version="2.1.1">
+        <PackageReference Include="ClassIsland.PluginSdk" Version="2.1.1.1">
             <ExcludeAssets>runtime; native</ExcludeAssets>
         </PackageReference>
         <PackageReference Include="MorerialsAvalonia" Version="1.1.0" GeneratePathProperty="true" />
         <PackageReference Include="OmniTTS.Shared" Version="1.0.0" GeneratePathProperty="true" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Update="Views\CsvImport.axaml.cs">
-        <DependentUpon>CsvImport.axaml</DependentUpon>
-      </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Remove="C:\Users\HUS\.nuget\packages\omnitts.shared\1.0.0\lib\net10.0\OmniTTS.Shared.dll" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="C:\Users\HUS\.nuget\packages\omnitts.shared\1.0.0\lib\net10.0\OmniTTS.Shared.dll" />
     </ItemGroup>
 
     <ItemGroup>

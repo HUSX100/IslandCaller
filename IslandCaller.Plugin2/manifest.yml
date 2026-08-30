@@ -17,3 +17,6 @@ repoName: IslandCaller
 assetsRoot: master/IslandCaller.Plugin2/
 artifactName: IslandCaller.Plugin2.cipx
 tagPattern: 2.*.**
+dependencies:
+  - id: HickoryTrail.OmniTTS
+    isRequired: false
