@@ -34,14 +34,14 @@ public static class RemoteCiBridge
     /// <summary>
     /// 向 RemoteCI 注册“随机点名”远程扩展；RemoteCI 未加载或接口缺失时静默跳过。
     /// </summary>
-    public static void RegisterRandomCallExtension(ILogger logger)
+    public static void RegisterRandomCallExtension(ILogger? logger)
     {
         lock (SyncRoot)
         {
             var assembly = FindRemoteCiAssembly();
             if (assembly is null)
             {
-                logger.LogDebug("未检测到 RemoteCI 插件，跳过远程扩展注册");
+                logger?.LogDebug("未检测到 RemoteCI 插件，跳过远程扩展注册");
                 return;
             }
 
@@ -49,25 +49,25 @@ public static class RemoteCiBridge
             var extensionInterfaceType = assembly.GetType(ExtensionInterfaceName);
             if (_registryType is null || extensionInterfaceType is null)
             {
-                logger.LogWarning("RemoteCI 插件版本不包含扩展接口，跳过远程扩展注册");
+                logger?.LogWarning("RemoteCI 插件版本不包含扩展接口，跳过远程扩展注册");
                 return;
             }
 
             _registry = GetRegistryService(_registryType);
             if (_registry is null)
             {
-                logger.LogWarning("未取得 RemoteCI 扩展注册表服务，跳过远程扩展注册");
+                logger?.LogWarning("未取得 RemoteCI 扩展注册表服务，跳过远程扩展注册");
                 return;
             }
 
             var proxy = RemoteCiExtensionProxy.Create(extensionInterfaceType, logger);
             _registryType.GetMethod("Register")!.Invoke(_registry, new object[] { proxy });
-            logger.LogInformation("已注册 RemoteCI 远程扩展：随机点名");
+            logger?.LogInformation("已注册 RemoteCI 远程扩展：随机点名");
         }
     }
 
     /// <summary>注销已注册的远程扩展，避免退出后残留无效入口。</summary>
-    public static void UnregisterRandomCallExtension(ILogger logger)
+    public static void UnregisterRandomCallExtension(ILogger? logger)
     {
         lock (SyncRoot)
         {
@@ -78,7 +78,7 @@ public static class RemoteCiBridge
             }
             catch (Exception ex)
             {
-                logger.LogWarning($"注销 RemoteCI 扩展失败：{ex}");
+                logger?.LogWarning($"注销 RemoteCI 扩展失败：{ex}");
             }
         }
     }
@@ -108,13 +108,13 @@ public static class RemoteCiBridge
 internal class RemoteCiExtensionProxy : DispatchProxy
 {
     private Type _commandResultType = null!;
-    private ILogger _logger = null!;
+    private ILogger? _logger;
 
     public RemoteCiExtensionProxy()
     {
     }
 
-    public static object Create(Type extensionInterfaceType, ILogger logger)
+    public static object Create(Type extensionInterfaceType, ILogger? logger)
     {
         var proxy = (RemoteCiExtensionProxy)DispatchProxy.Create(extensionInterfaceType, typeof(RemoteCiExtensionProxy));
         proxy._logger = logger;
@@ -144,7 +144,7 @@ internal class RemoteCiExtensionProxy : DispatchProxy
             case "ExecuteAsync":
                 return ExecuteCore();
             default:
-                _logger.LogWarning($"RemoteCI 扩展调用了未处理的成员：{targetMethod.Name}");
+                _logger?.LogWarning($"RemoteCI 扩展调用了未处理的成员：{targetMethod.Name}");
                 return null;
         }
     }
@@ -166,7 +166,7 @@ internal class RemoteCiExtensionProxy : DispatchProxy
         catch (Exception ex)
         {
             // 抛给 RemoteCI 执行端，由其统一转换为 INTERNAL_ERROR 回执。
-            _logger.LogError(ex, "RemoteCI 扩展执行失败（随机点名）");
+            _logger?.LogError(ex, "RemoteCI 扩展执行失败（随机点名）");
             throw;
         }
     }
