@@ -5,6 +5,7 @@ using ClassIsland.Core.Attributes;
 using ClassIsland.Core.Extensions.Registry;
 using ClassIsland.Shared;
 using IslandCaller.Actions;
+using IslandCaller.Extensions;
 using IslandCaller.Helpers;
 using IslandCaller.Models;
 using IslandCaller.Services;
@@ -54,6 +55,15 @@ namespace IslandCaller
                     IAppHost.GetService<CoreService>().InitializeCore();
                     logger.LogDebug("核心服务初始化完成，正在启动 IslandCaller 服务...");
                     IAppHost.GetService<IslandCallerService>();
+                    // 接入 RemoteCI：在手表“控制”页注册“随机点名”远程扩展（RemoteCI 未安装时自动跳过）。
+                    try
+                    {
+                        RemoteCiBridge.RegisterRandomCallExtension(logger);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning($"注册 RemoteCI 远程扩展失败：{ex}");
+                    }
                     logger.LogInformation("IslandCaller 插件初始化完成");
                     if (Settings.Instance.Hover.IsEnable)
                     {
@@ -68,6 +78,19 @@ namespace IslandCaller
                     throw;
                 }
 
+            };
+
+            // RemoteCI 插件退出时注销远程扩展，避免残留无效入口。
+            AppBase.Current.AppStopping += (_, _) =>
+            {
+                try
+                {
+                    RemoteCiBridge.UnregisterRandomCallExtension(logger);
+                }
+                catch (Exception ex)
+                {
+                    logger?.LogWarning($"注销 RemoteCI 扩展失败：{ex}");
+                }
             };
         }
     }
