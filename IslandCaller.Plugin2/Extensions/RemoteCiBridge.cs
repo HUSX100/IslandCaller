@@ -153,15 +153,42 @@ internal class RemoteCiExtensionProxy : DispatchProxy
     {
         try
         {
+            // 与 IslandCallerService.ShowRandomStudent 的准入判断保持一致：课间禁用期间、
+            // 或已有一次不可打断的点名正在进行时，点名不会真正执行，此时必须如实回执失败，
+            // 否则手表端与 WebUI 会收到「已开始随机点名」的错误回执。
+            var status = IAppHost.GetService<IslandCaller.Services.Status>();
+            if (!status.IsPluginReady)
+            {
+                string code;
+                string message;
+                if (!status.IsTimeStatusAvailable)
+                {
+                    // 处于课间且启用了下课禁用，点名功能整体不可用。
+                    code = "INVALID_REQUEST";
+                    message = "当前处于课间，点名未执行";
+                }
+                else if (!status.OccupationDisable && !status.InterruptionEnable)
+                {
+                    // 上一次点名仍未结束且不允许打断，对应 RemoteCI 的 BUSY 语义。
+                    code = "BUSY";
+                    message = "上一次点名尚未结束，点名未执行";
+                }
+                else
+                {
+                    // 插件尚未完成初始化等其余未就绪状态。
+                    code = "INVALID_REQUEST";
+                    message = "IslandCaller 尚未就绪，点名未执行";
+                }
+
+                _logger?.LogInformation("RemoteCI 随机点名被拒绝（{Code}）：{Message}", code, message);
+                return TaskFromResult(CreateResult(false, code, message));
+            }
+
             // 触发一次单人随机抽选；展示与通知仍由 IslandCaller 自身完成。
             var islandCallerService = IAppHost.GetService<IslandCallerService>();
             islandCallerService.ShowRandomStudent(1);
 
-            var result = Activator.CreateInstance(_commandResultType)!;
-            _commandResultType.GetProperty("Success")!.SetValue(result, true);
-            _commandResultType.GetProperty("Code")!.SetValue(result, "OK");
-            _commandResultType.GetProperty("Message")!.SetValue(result, "已开始随机点名");
-            return TaskFromResult(result);
+            return TaskFromResult(CreateResult(true, "OK", "已开始随机点名"));
         }
         catch (Exception ex)
         {
@@ -169,6 +196,19 @@ internal class RemoteCiExtensionProxy : DispatchProxy
             _logger?.LogError(ex, "RemoteCI 扩展执行失败（随机点名）");
             throw;
         }
+    }
+
+    /// <summary>
+    /// 按 RemoteCI 的 CommandResult 结构反射构造执行结果。
+    /// 失败码取自 RemoteCI.Shared 的 CommandResultCodes（如 BUSY、INVALID_REQUEST）。
+    /// </summary>
+    private object CreateResult(bool success, string code, string message)
+    {
+        var result = Activator.CreateInstance(_commandResultType)!;
+        _commandResultType.GetProperty("Success")!.SetValue(result, success);
+        _commandResultType.GetProperty("Code")!.SetValue(result, code);
+        _commandResultType.GetProperty("Message")!.SetValue(result, message);
+        return result;
     }
 
     /// <summary>反射构造 Task&lt;CommandResult&gt;，保证返回类型与接口签名一致。</summary>
