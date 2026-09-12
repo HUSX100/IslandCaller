@@ -1,4 +1,5 @@
 using System.Reflection;
+using Avalonia.Threading;
 using ClassIsland.Shared;
 using IslandCaller.Services.IslandCallerService;
 using Microsoft.Extensions.Logging;
@@ -151,51 +152,74 @@ internal class RemoteCiExtensionProxy : DispatchProxy
 
     private object ExecuteCore()
     {
-        try
+        // 准入判断与实际点名必须落在同一次 UI 线程调度里完成：ShowRandomStudent 在后台线程被调用时
+        // 只是把执行投递到 UI 线程，若先判断再投递，两个并发请求之间或一次课间切换之后，
+        // 判断结果就会失效，出现「回执成功但实际没有点名」。
+        // 因此这里把「判断 + 触发」整体投递到 UI 线程，并用 TaskCompletionSource 在结果产生后再回填回执：
+        // 既不阻塞 RemoteCI 的命令处理线程（其 15 秒超时依旧生效），也不会提前回执成功。
+        var completionType = typeof(TaskCompletionSource<>).MakeGenericType(_commandResultType);
+        var completion = completionType
+            .GetConstructor(new[] { typeof(TaskCreationOptions) })!
+            .Invoke(new object[] { TaskCreationOptions.RunContinuationsAsynchronously })!;
+        var setResult = completionType.GetMethod("SetResult", new[] { _commandResultType })!;
+        var setException = completionType.GetMethod("SetException", new[] { typeof(Exception) })!;
+
+        Dispatcher.UIThread.Post(() =>
         {
-            // 与 IslandCallerService.ShowRandomStudent 的准入判断保持一致：课间禁用期间、
-            // 或已有一次不可打断的点名正在进行时，点名不会真正执行，此时必须如实回执失败，
-            // 否则手表端与 WebUI 会收到「已开始随机点名」的错误回执。
-            var status = IAppHost.GetService<IslandCaller.Services.Status>();
-            if (!status.IsPluginReady)
+            try
             {
-                string code;
-                string message;
-                if (!status.IsTimeStatusAvailable)
-                {
-                    // 处于课间且启用了下课禁用，点名功能整体不可用。
-                    code = "INVALID_REQUEST";
-                    message = "当前处于课间，点名未执行";
-                }
-                else if (!status.OccupationDisable && !status.InterruptionEnable)
-                {
-                    // 上一次点名仍未结束且不允许打断，对应 RemoteCI 的 BUSY 语义。
-                    code = "BUSY";
-                    message = "上一次点名尚未结束，点名未执行";
-                }
-                else
-                {
-                    // 插件尚未完成初始化等其余未就绪状态。
-                    code = "INVALID_REQUEST";
-                    message = "IslandCaller 尚未就绪，点名未执行";
-                }
-
-                _logger?.LogInformation("RemoteCI 随机点名被拒绝（{Code}）：{Message}", code, message);
-                return TaskFromResult(CreateResult(false, code, message));
+                setResult.Invoke(completion, new[] { InvokeRandomCallOnUiThread() });
             }
+            catch (Exception ex)
+            {
+                // 交给 RemoteCI 执行端统一转换为 INTERNAL_ERROR 回执。
+                _logger?.LogError(ex, "RemoteCI 扩展执行失败（随机点名）");
+                setException.Invoke(completion, new object[] { ex });
+            }
+        });
 
-            // 触发一次单人随机抽选；展示与通知仍由 IslandCaller 自身完成。
-            var islandCallerService = IAppHost.GetService<IslandCallerService>();
-            islandCallerService.ShowRandomStudent(1);
+        return completionType.GetProperty("Task")!.GetValue(completion)!;
+    }
 
-            return TaskFromResult(CreateResult(true, "OK", "已开始随机点名"));
-        }
-        catch (Exception ex)
+    /// <summary>
+    /// 在 UI 线程上完成「准入判断 + 触发点名」，并返回 RemoteCI 的执行结果。
+    /// 判断条件与 IslandCallerService.ShowRandomStudent 的准入条件保持一致：课间禁用期间、
+    /// 或已有一次不可打断的点名正在进行时，点名不会真正执行，此时必须如实回执失败，
+    /// 否则手表端与 WebUI 会收到「已开始随机点名」的错误回执。
+    /// </summary>
+    private object InvokeRandomCallOnUiThread()
+    {
+        var status = IAppHost.GetService<IslandCaller.Services.Status>();
+        if (status.IsPluginReady)
         {
-            // 抛给 RemoteCI 执行端，由其统一转换为 INTERNAL_ERROR 回执。
-            _logger?.LogError(ex, "RemoteCI 扩展执行失败（随机点名）");
-            throw;
+            // 触发一次单人随机抽选；展示与通知仍由 IslandCaller 自身完成。
+            IAppHost.GetService<IslandCallerService>().ShowRandomStudent(1);
+            return CreateResult(true, "OK", "已开始随机点名");
         }
+
+        string code;
+        string message;
+        if (!status.IsTimeStatusAvailable)
+        {
+            // 处于课间且启用了下课禁用，点名功能整体不可用。
+            code = "INVALID_REQUEST";
+            message = "当前处于课间，点名未执行";
+        }
+        else if (!status.OccupationDisable && !status.InterruptionEnable)
+        {
+            // 上一次点名仍未结束且不允许打断，对应 RemoteCI 的 BUSY 语义。
+            code = "BUSY";
+            message = "上一次点名尚未结束，点名未执行";
+        }
+        else
+        {
+            // 插件尚未完成初始化等其余未就绪状态。
+            code = "INVALID_REQUEST";
+            message = "IslandCaller 尚未就绪，点名未执行";
+        }
+
+        _logger?.LogInformation("RemoteCI 随机点名被拒绝（{Code}）：{Message}", code, message);
+        return CreateResult(false, code, message);
     }
 
     /// <summary>
@@ -209,12 +233,5 @@ internal class RemoteCiExtensionProxy : DispatchProxy
         _commandResultType.GetProperty("Code")!.SetValue(result, code);
         _commandResultType.GetProperty("Message")!.SetValue(result, message);
         return result;
-    }
-
-    /// <summary>反射构造 Task&lt;CommandResult&gt;，保证返回类型与接口签名一致。</summary>
-    private object TaskFromResult(object result)
-    {
-        var fromResult = typeof(Task).GetMethod(nameof(Task.FromResult))!.MakeGenericMethod(_commandResultType);
-        return fromResult.Invoke(null, new[] { result })!;
     }
 }
